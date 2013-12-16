@@ -552,6 +552,7 @@ public final class MyStrategy implements Strategy {
                     return;
                 }
 
+
                 if (makeABoom(self)) {
                     return;
                 }
