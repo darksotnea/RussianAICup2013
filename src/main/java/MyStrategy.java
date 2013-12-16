@@ -348,6 +348,16 @@ public final class MyStrategy implements Strategy {
                 }
 
             } else {
+
+                if (listOfSowEnemys.size() >= 2) {
+                    for (GameUnit gameUnit : listOfSowEnemys) {
+                        if (self.getDistanceTo(gameUnit.x, gameUnit.y) <= 5) {
+                            useGrenade(self, gameUnit.x, gameUnit.y);
+                            return;
+                        }
+                    }
+                }
+
                 if (tryToUseMedkit(self)) {
                     return;
                 }
@@ -508,6 +518,15 @@ public final class MyStrategy implements Strategy {
                 }
             } else {
 
+                if (listOfSowEnemys.size() >= 2) {
+                    for (GameUnit gameUnit : listOfSowEnemys) {
+                        if (self.getDistanceTo(gameUnit.x, gameUnit.y) <= 5) {
+                            useGrenade(self, gameUnit.x, gameUnit.y);
+                            return;
+                        }
+                    }
+                }
+
                 if (!(istroopersUnderAttack && trooperUnderAttack == self.getId()) && goHeal(self) && !goToSafePlace) {
                     return;
                 }
@@ -569,6 +588,16 @@ public final class MyStrategy implements Strategy {
                 }
 
             } else {
+
+                if (listOfSowEnemys.size() >= 2) {
+                    for (GameUnit gameUnit : listOfSowEnemys) {
+                        if (self.getDistanceTo(gameUnit.x, gameUnit.y) <= 5) {
+                            useGrenade(self, gameUnit.x, gameUnit.y);
+                            return;
+                        }
+                    }
+                }
+
                 if (tryToUseMedkit(self)) {
                     return;
                 }
@@ -635,6 +664,16 @@ public final class MyStrategy implements Strategy {
                 }
 
             } else {
+
+                if (listOfSowEnemys.size() >= 2) {
+                    for (GameUnit gameUnit : listOfSowEnemys) {
+                        if (self.getDistanceTo(gameUnit.x, gameUnit.y) <= 5) {
+                            useGrenade(self, gameUnit.x, gameUnit.y);
+                            return;
+                        }
+                    }
+                }
+
                 if (tryToUseMedkit(self)) {
                     return;
                 }
