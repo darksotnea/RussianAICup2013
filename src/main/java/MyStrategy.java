@@ -238,7 +238,7 @@ public final class MyStrategy implements Strategy {
                     int count = 0;
 
                     for (Trooper trooper1 : troopers) {
-                        if (trooper1.isTeammate() && world.isVisible(self.getVisionRange(), self.getX(), self.getY(), self.getStance(), gameUnit.trooper.getX(), gameUnit.trooper.getY(), gameUnit.trooper.getStance()/*TrooperStance.PRONE*/)) {
+                        if (trooper1.isTeammate() && world.isVisible(trooper1.getVisionRange(), trooper1.getX(), trooper1.getY(), trooper1.getStance(), gameUnit.trooper.getX(), gameUnit.trooper.getY(), gameUnit.trooper.getStance())) {
                             for (Trooper trooper : listOfEnemys) {
                                 if (trooper.getX() == gameUnit.trooper.getX() && trooper.getY() == gameUnit.trooper.getY()) {
                                     isOldOutdated = false;
