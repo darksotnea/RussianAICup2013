@@ -1327,19 +1327,19 @@ public final class MyStrategy implements Strategy {
                     LinkedList<thePoint> path2 = null;
 
                     Trooper tempTrooper;
-                    if (hpOfTroopers.length == 5) {
+                    if (indexOfScout != -1) {
                         tempTrooper = troopers[indexOfScout];
                         path2 = lee(tempTrooper, tempTrooper.getX(), tempTrooper.getY(), targetX, targetY, false);
-                    }
 
-                    if (indexOfScout != -1 && path1 != null && path2 != null && path2.size() - path1.size() > 0) {
-                        if (!isUseLastMove && goOnPath(self, lastMoveX, lastMoveY, true)) {
-                            isUseLastMove = true;
-                            return true;
-                        } else {
-                            isUseLastMove = false;
-                            move.setAction(ActionType.END_TURN);
-                            return true;
+                        if (path1 != null && path2 != null && path2.size() - path1.size() > 0) {
+                            if (!isUseLastMove && goOnPath(self, lastMoveX, lastMoveY, true)) {
+                                isUseLastMove = true;
+                                return true;
+                            } else {
+                                isUseLastMove = false;
+                                move.setAction(ActionType.END_TURN);
+                                return true;
+                            }
                         }
                     } else {
 
@@ -1402,19 +1402,19 @@ public final class MyStrategy implements Strategy {
                     LinkedList<thePoint> path2 = null;
 
                     Trooper tempTrooper;
-                    if (hpOfTroopers.length == 5) {
+                    if (indexOfScout != -1) {
                         tempTrooper = troopers[indexOfScout];
                         path2 = lee(tempTrooper, tempTrooper.getX(), tempTrooper.getY(), targetX, targetY, false);
-                    }
 
-                    if (indexOfScout != -1 && path1 != null && path2 != null && path2.size() - path1.size() > 0) {
-                        if (!isUseLastMove && goOnPath(self, lastMoveX, lastMoveY, true)) {
-                            isUseLastMove = true;
-                            return true;
-                        } else {
-                            isUseLastMove = false;
-                            move.setAction(ActionType.END_TURN);
-                            return true;
+                        if (path1 != null && path2 != null && path2.size() - path1.size() > 0) {
+                            if (!isUseLastMove && goOnPath(self, lastMoveX, lastMoveY, true)) {
+                                isUseLastMove = true;
+                                return true;
+                            } else {
+                                isUseLastMove = false;
+                                move.setAction(ActionType.END_TURN);
+                                return true;
+                            }
                         }
                     } else {
 
