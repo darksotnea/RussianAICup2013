@@ -1520,7 +1520,7 @@ public final class MyStrategy implements Strategy {
         }
 
         if (targetTrooper != null && teamSupportCount < 2 && self.getDistanceTo(targetTrooper) > 5 && self.getActionPoints() >= 6 && self.getStance() == TrooperStance.STANDING) {
-            goOnWar(self, targetTrooper.getX(), targetTrooper.getY());
+            goOnWar(self, globalTargetX, globalTargetY);
             return true;
         }
 
