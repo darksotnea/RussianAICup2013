@@ -3460,6 +3460,10 @@ public final class MyStrategy implements Strategy {
 
     boolean goToMedic(Trooper self) {
 
+        if (goAndKillTarget(self)) {
+            return true;
+        }
+
         if (self.getHitpoints() < HP_WHEN_GO_MEDIC && self.getActionPoints() >= getCostMoveWithStance(self) && self.getType() != TrooperType.FIELD_MEDIC) {
 
             if (indexOfMedic != -1 && self.getDistanceTo(troopers[indexOfMedic]) > 1) {
