@@ -275,7 +275,7 @@ public final class MyStrategy implements Strategy {
         if (hpOfTroopers.length == 5) {
             Player[] playersTest = world.getPlayers();
             for (Player player : playersTest) {
-                if (!player.getName().equalsIgnoreCase("darkstone") && player.isStrategyCrashed()) {
+                if (!player.getName().equalsIgnoreCase("darkstone") && player.isStrategyCrashed() && !isEnemyStrategyCrashed) {
                     if(indexOfCommander != -1) {
                         needHelpFromAir = true;
                     }
@@ -1003,7 +1003,7 @@ public final class MyStrategy implements Strategy {
             }
 
             //логика обработки врагов. Если врагов: 1 ...
-            if (targetTrooper != null && listOfEnemys.size() == 1) {
+            if (targetTrooper != null && listOfEnemys.size() == 1 && world.getMoveIndex() >= 5) {
                 if ((indexOfSoldier != -1 && troopers[indexOfSoldier].getDistanceTo(targetTrooper) <= troopers[indexOfSoldier].getShootingRange() && world.isVisible(troopers[indexOfSoldier].getVisionRange(), troopers[indexOfSoldier].getX(), troopers[indexOfSoldier].getY(), troopers[indexOfSoldier].getStance(), targetTrooper.getX(), targetTrooper.getY(), targetTrooper.getStance())) || (indexOfSniper != -1 && troopers[indexOfSniper].getDistanceTo(targetTrooper) <= troopers[indexOfSniper].getShootingRange() && world.isVisible(troopers[indexOfSniper].getVisionRange(), troopers[indexOfSniper].getX(), troopers[indexOfSniper].getY(), troopers[indexOfSniper].getStance(), targetTrooper.getX(), targetTrooper.getY(), targetTrooper.getStance()))) {
                     Trooper trooper = listOfEnemys.get(0);
                     if (teamSupportCount > 0 && trooper.getStance() != TrooperStance.PRONE && self.getHitpoints() > 65 && trooper.getType() == TrooperType.SOLDIER || teamSupportCount > 0 && trooper.getStance() != TrooperStance.PRONE && trooper.getType() != TrooperType.SOLDIER && self.getHitpoints() > 65 || trueMapOfPoints[self.getX()][self.getY()] != 2 && trooper.getHitpoints() <= 30 && trooper.getStance() == TrooperStance.PRONE || trueMapOfPoints[self.getX()][self.getY()] != 2 && self.getHitpoints() > 65 && trooper.getHitpoints() <= 75 && trooper.getStance() != TrooperStance.PRONE && Math.random() * 3 == 0) {
