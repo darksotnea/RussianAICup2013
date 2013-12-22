@@ -95,12 +95,6 @@ public final class MyStrategy implements Strategy {
         //строим карту с приоритетом ячеек
         trueMapOfPoints = getMapOfPoints(self);
 
-        if (self.getId() == idOfTrooperStop) {
-            idOfTrooperStop = -1;
-            move.setAction(ActionType.END_TURN);
-            return;
-        }
-
         if (targetTrooper == null) {
             beginBattle = false;
         }
@@ -335,6 +329,20 @@ public final class MyStrategy implements Strategy {
             }
 
             processingHpOfTroopers();
+        }
+
+        if (self.getId() == idOfTrooperStop) {
+            for (Trooper trooper : listOfEnemyTroopers) {
+                if (canShootOnTarget(self, trooper)) {
+                    move.setAction(ActionType.SHOOT);
+                    move.setX(trooper.getX());
+                    move.setY(trooper.getY());
+                    return;
+                }
+            }
+            idOfTrooperStop = -1;
+            move.setAction(ActionType.END_TURN);
+            return;
         }
 
         //TODO   @@@@@@@@@@@@@@@@@@@@@@@         КОМАНДОР             @@@@@@@@@@@@@@@@@@@@@@@@@
@@ -1922,12 +1930,12 @@ public final class MyStrategy implements Strategy {
 
         if (scoutNotDead == 1) {
             return scoutNotDeadTrooper;
-        } else if (commanderNotDead == 1) {
-            return commanderNotDeadTrooper;
-        } else if (soldierNotDead == 1) {
-            return soldierNotDeadTrooper;
         } else if (sniperNotDead == 1) {
             return sniperNotDeadTrooper;
+        } else if (soldierNotDead == 1) {
+            return soldierNotDeadTrooper;
+        } else if (commanderNotDead == 1) {
+            return commanderNotDeadTrooper;
         } else if (medicNotDead == 1) {
             return medicNotDeadTrooper;
         }
