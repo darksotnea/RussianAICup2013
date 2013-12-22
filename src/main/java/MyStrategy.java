@@ -59,6 +59,7 @@ public final class MyStrategy implements Strategy {
     private static int savedTrooperId = -1;
     private static boolean goThrowGrenade = false;
     private static LinkedList<GameUnit> listOfSowEnemys = new LinkedList<>();
+    private static LinkedList<Trooper> listOfEnemyTroopers;
     private static boolean isEnemyStrategyCrashed = false;
     private boolean goToBonus = false;
     private static int myScore = 0;
@@ -264,6 +265,38 @@ public final class MyStrategy implements Strategy {
             if(listOfEnemys.size() != 0) {
                 for (Trooper trooper : listOfEnemys) {
                     listOfSowEnemys.add(new GameUnit(trooper));
+                }
+            }
+        }
+
+        listOfEnemyTroopers = new LinkedList<>();
+
+        if (listOfEnemys.size() != 0) {
+            for (Trooper trooper : listOfEnemys) {
+                boolean test = true;
+                for (Trooper trooper1 : listOfEnemyTroopers) {
+                    if (trooper.getX() == trooper1.getX() && trooper.getY() == trooper1.getY()) {
+                        test = false;
+                        break;
+                    }
+                }
+                if (test) {
+                    listOfEnemyTroopers.add(trooper);
+                }
+            }
+        }
+
+        if (listOfSowEnemys.size() != 0) {
+            for (GameUnit gameUnit : listOfSowEnemys) {
+                boolean test = true;
+                for (Trooper trooper1 : listOfEnemyTroopers) {
+                    if (gameUnit.trooper.getX() == trooper1.getX() && gameUnit.trooper.getY() == trooper1.getY()) {
+                        test = false;
+                        break;
+                    }
+                }
+                if (test) {
+                    listOfEnemyTroopers.add(gameUnit.trooper);
                 }
             }
         }
@@ -895,7 +928,7 @@ public final class MyStrategy implements Strategy {
     boolean goOnWar(Trooper self, int targetX, int targetY) {
 
         //медик при обнаружении врага пытается его добить если мало хп и бежит к дальнему своему юниту.
-        if (self.getType() == TrooperType.FIELD_MEDIC && listOfEnemys != null && listOfEnemys.size() != 0) {
+        if (self.getType() == TrooperType.FIELD_MEDIC && listOfEnemyTroopers != null && listOfEnemyTroopers.size() != 0) {
 
             //пытается убить любую вражескую цель, если она убиваема
             if (killAnyEnemyUnit(self)) {
@@ -903,32 +936,39 @@ public final class MyStrategy implements Strategy {
             }
 
             if (indexOfSniper != -1 && self.getDistanceTo(troopers[indexOfSniper]) > 3) {
-                if (targetTrooper!= null && canSeeOrCanShoot(self, targetTrooper, false)) {
-                    if (troopers[indexOfSniper].getHitpoints() <= 30) {
-                        if (goOnPath(self, troopers[indexOfSniper].getX(), troopers[indexOfSniper].getY(), false)) {
-                            return true;
-                        }
-                    } else {
-                        if (canShootOnTarget(self, targetTrooper)) {
-                            shootOnTarget(self, targetTrooper);
-                            return true;
+
+                for (Trooper trooper : listOfEnemyTroopers) {
+
+                    if (canSeeOrCanShoot(self, trooper, false)) {
+                        if (troopers[indexOfSniper].getHitpoints() <= 30) {
+                            if (goOnPath(self, troopers[indexOfSniper].getX(), troopers[indexOfSniper].getY(), false)) {
+                                return true;
+                            }
+                        } else {
+                            if (canShootOnTarget(self, trooper)) {
+                                shootOnTarget(self, trooper);
+                                return true;
+                            }
                         }
                     }
+
                 }
 
                 if (goOnPath(self, troopers[indexOfSniper].getX(), troopers[indexOfSniper].getY(), false)) {
                     return true;
                 }
             } else if (indexOfSoldier != -1 && self.getDistanceTo(troopers[indexOfSoldier]) > 3) {
-                if (targetTrooper!= null && canSeeOrCanShoot(self, targetTrooper, false)) {
-                    if (troopers[indexOfSoldier].getHitpoints() <= 30) {
-                        if (goOnPath(self, troopers[indexOfSoldier].getX(), troopers[indexOfSoldier].getY(), false)) {
-                            return true;
-                        }
-                    } else {
-                        if (canShootOnTarget(self, targetTrooper)) {
-                            shootOnTarget(self, targetTrooper);
-                            return true;
+                for (Trooper trooper : listOfEnemyTroopers) {
+                    if (canSeeOrCanShoot(self, trooper, false)) {
+                        if (troopers[indexOfSoldier].getHitpoints() <= 30) {
+                            if (goOnPath(self, troopers[indexOfSoldier].getX(), troopers[indexOfSoldier].getY(), false)) {
+                                return true;
+                            }
+                        } else {
+                            if (canShootOnTarget(self, trooper)) {
+                                shootOnTarget(self, trooper);
+                                return true;
+                            }
                         }
                     }
                 }
@@ -937,15 +977,17 @@ public final class MyStrategy implements Strategy {
                     return true;
                 }
             } else if (indexOfCommander != -1 && self.getDistanceTo(troopers[indexOfCommander]) > 3) {
-                if (targetTrooper!= null && canSeeOrCanShoot(self, targetTrooper, false)) {
-                    if (troopers[indexOfCommander].getHitpoints() <= 30) {
-                        if (goOnPath(self, troopers[indexOfCommander].getX(), troopers[indexOfCommander].getY(), false)) {
-                            return true;
-                        }
-                    } else {
-                        if (canShootOnTarget(self, targetTrooper)) {
-                            shootOnTarget(self, targetTrooper);
-                            return true;
+                for (Trooper trooper : listOfEnemyTroopers) {
+                    if (canSeeOrCanShoot(self, trooper, false)) {
+                        if (troopers[indexOfCommander].getHitpoints() <= 30) {
+                            if (goOnPath(self, troopers[indexOfCommander].getX(), troopers[indexOfCommander].getY(), false)) {
+                                return true;
+                            }
+                        } else {
+                            if (canShootOnTarget(self, trooper)) {
+                                shootOnTarget(self, trooper);
+                                return true;
+                            }
                         }
                     }
                 }
@@ -959,7 +1001,7 @@ public final class MyStrategy implements Strategy {
 
 
         //управление снайпером, чтобы не лез на передовую при живых командире и солдате //TODO как контролировать передвижение снайпера?
-        if (self.getType() == TrooperType.SNIPER && listOfEnemys != null && listOfEnemys.size() > 0 && (indexOfCommander != -1 || indexOfScout != -1 || indexOfSoldier != -1)) {
+        if (self.getType() == TrooperType.SNIPER && listOfEnemyTroopers != null && listOfEnemyTroopers.size() > 0 && (indexOfCommander != -1 || indexOfScout != -1 || indexOfSoldier != -1)) {
 
             //пытается убить любую вражескую цель, если она убиваема
             if (killAnyEnemyUnit(self)) {
@@ -982,10 +1024,10 @@ public final class MyStrategy implements Strategy {
         }
 
         Trooper choosenOne;
-        if (listOfEnemys.size() != 0) {
+        if (listOfEnemyTroopers.size() != 0) {
 
             //не может быть равен -1, так как listOfEnemys не пуст.
-            choosenOne = chooseEnemyOnDistance(self, listOfEnemys);
+            choosenOne = chooseEnemyOnDistance(self, listOfEnemyTroopers);
             if(choosenOne != null) {
                 targetTrooper = choosenOne;
             }
@@ -995,7 +1037,7 @@ public final class MyStrategy implements Strategy {
             }
 
             boolean isVisibleForEnemys = false;
-            for (Trooper trooper : listOfEnemys) {
+            for (Trooper trooper : listOfEnemyTroopers) {
                 if (world.isVisible(trooper.getVisionRange(), trooper.getX(), trooper.getY(), trooper.getStance(), self.getX(), self.getY(), self.getStance())) {
                     isVisibleForEnemys = true;
                     break;
@@ -1003,9 +1045,9 @@ public final class MyStrategy implements Strategy {
             }
 
             //логика обработки врагов. Если врагов: 1 ...
-            if (targetTrooper != null && listOfEnemys.size() == 1 && world.getMoveIndex() >= 5) {
+            if (targetTrooper != null && listOfEnemyTroopers.size() == 1 && world.getMoveIndex() >= 5) {
                 if ((indexOfSoldier != -1 && troopers[indexOfSoldier].getDistanceTo(targetTrooper) <= troopers[indexOfSoldier].getShootingRange() && world.isVisible(troopers[indexOfSoldier].getVisionRange(), troopers[indexOfSoldier].getX(), troopers[indexOfSoldier].getY(), troopers[indexOfSoldier].getStance(), targetTrooper.getX(), targetTrooper.getY(), targetTrooper.getStance())) || (indexOfSniper != -1 && troopers[indexOfSniper].getDistanceTo(targetTrooper) <= troopers[indexOfSniper].getShootingRange() && world.isVisible(troopers[indexOfSniper].getVisionRange(), troopers[indexOfSniper].getX(), troopers[indexOfSniper].getY(), troopers[indexOfSniper].getStance(), targetTrooper.getX(), targetTrooper.getY(), targetTrooper.getStance()))) {
-                    Trooper trooper = listOfEnemys.get(0);
+                    Trooper trooper = listOfEnemyTroopers.get(0);
                     if (teamSupportCount > 0 && trooper.getStance() != TrooperStance.PRONE && self.getHitpoints() > 65 && trooper.getType() == TrooperType.SOLDIER || teamSupportCount > 0 && trooper.getStance() != TrooperStance.PRONE && trooper.getType() != TrooperType.SOLDIER && self.getHitpoints() > 65 || trueMapOfPoints[self.getX()][self.getY()] != 2 && trooper.getHitpoints() <= 30 && trooper.getStance() == TrooperStance.PRONE || trueMapOfPoints[self.getX()][self.getY()] != 2 && self.getHitpoints() > 65 && trooper.getHitpoints() <= 75 && trooper.getStance() != TrooperStance.PRONE && Math.random() * 3 == 0) {
                         isVisibleForEnemys = false;
                         goToSafePlace = false;
@@ -1015,8 +1057,8 @@ public final class MyStrategy implements Strategy {
             }
 
             //... или 2 ...
-            if (targetTrooper != null && listOfEnemys.size() == 2) {
-                for (Trooper trooper : listOfEnemys) {
+            if (targetTrooper != null && listOfEnemyTroopers.size() == 2) {
+                for (Trooper trooper : listOfEnemyTroopers) {
                     if (teamSupportCount > 0 && trooper.getStance() != TrooperStance.PRONE && self.getHitpoints() > 75 && trooper.getType() == TrooperType.SOLDIER || teamSupportCount > 0 && trooper.getStance() != TrooperStance.PRONE && trooper.getType() != TrooperType.SOLDIER && self.getHitpoints() > 65 || trueMapOfPoints[self.getX()][self.getY()] != 2 && trooper.getHitpoints() <= 30 && trooper.getStance() == TrooperStance.PRONE || trueMapOfPoints[self.getX()][self.getY()] != 2 && self.getHitpoints() > 75 && trooper.getHitpoints() <= 75 && trooper.getStance() != TrooperStance.PRONE && Math.random() * 4 == 0) {
                         isVisibleForEnemys = false;
                         goToSafePlace = false;
@@ -1026,7 +1068,7 @@ public final class MyStrategy implements Strategy {
             }
 
             //... или >= 3.
-            if (targetTrooper != null && listOfEnemys.size() >= 3) {
+            if (targetTrooper != null && listOfEnemyTroopers.size() >= 3) {
                 if (self.getHitpoints() > 75) {
                     if (teamSupportCount >= 2) {
                         isVisibleForEnemys = false;
@@ -1086,7 +1128,7 @@ public final class MyStrategy implements Strategy {
                         }
                     }
 
-                    for (Trooper trooper : listOfEnemys) {
+                    for (Trooper trooper : listOfEnemyTroopers) {
                         if (canSeeOrCanShoot(trooper, self, false)) {
                             if (conductTheWar(self)) {
                                 return true;
@@ -1145,7 +1187,7 @@ public final class MyStrategy implements Strategy {
 
             if(self.getType() == TrooperType.FIELD_MEDIC) {
                 boolean canMove = true;
-                for (Trooper trooper : listOfEnemys) {
+                for (Trooper trooper : listOfEnemyTroopers) {
                     if (canSeeOrCanShoot(trooper, self, true)) {
                         canMove = false;
                         if (makeValidLowerStance(self, false)) { //TODO можно убрать
@@ -1511,22 +1553,22 @@ public final class MyStrategy implements Strategy {
             return true;
         }
 
-        if (targetTrooper != null && teamSupportCount < 2 && self.getDistanceTo(targetTrooper) > 5 && self.getActionPoints() >= 6 && self.getStance() == TrooperStance.STANDING) {
+       /* if (targetTrooper != null && teamSupportCount < 2 && self.getDistanceTo(targetTrooper) > 5 && self.getActionPoints() >= 6 && self.getStance() == TrooperStance.STANDING) {
             goOnWar(self, globalTargetX, globalTargetY);
             return true;
-        }
+        }*/
 
-        if (listOfEnemys.size() != 0) {
+        if (listOfEnemyTroopers.size() != 0) {
             if (self.getActionPoints() >= self.getShootCost()) {
 
-                Trooper choosenOne = chooseEnemyOnDistance(self, listOfEnemys);
+                Trooper choosenOne = chooseEnemyOnDistance(self, listOfEnemyTroopers);
 
                 if (choosenOne != null) {
                     targetTrooper = choosenOne;
 
                     //пытаемся опуститься так, чтобы противник нас не видел, а мы его видели //TODO тоже какая то фигня бесполезная, проверить!!
                     if (self.getActionPoints() >= self.getShootCost() + game.getStanceChangeCost()) {
-                        for (Trooper trooper : listOfEnemys) {
+                        for (Trooper trooper : listOfEnemyTroopers) {
                             if (self.getStance() == TrooperStance.STANDING && world.isVisible(self.getShootingRange(), self.getX(), self.getY(), TrooperStance.KNEELING, trooper.getX(), trooper.getY(), trooper.getStance()) && !world.isVisible(trooper.getVisionRange(), trooper.getX(), trooper.getY(), trooper.getStance(), self.getX(), self.getY(), TrooperStance.KNEELING) && world.isVisible(trooper.getShootingRange() <= trooper.getVisionRange() ? trooper.getVisionRange() : trooper.getShootingRange(), trooper.getX(), trooper.getY(), trooper.getStance(), self.getX(), self.getY(), TrooperStance.STANDING)) {
                                 if (self.getActionPoints() >= game.getStanceChangeCost()) {
                                     move.setAction(ActionType.LOWER_STANCE);
@@ -1769,7 +1811,7 @@ public final class MyStrategy implements Strategy {
         }
 
         if (seeOrShoot) {
-            for (Trooper trooper : listOfEnemys) {
+            for (Trooper trooper : listOfEnemyTroopers) {
                 for (int k = 0; k < W; k++) {
                     for (int m = 0; m < H; m++) {
                         if (trooper.getDistanceTo(k, m) <= trooper.getVisionRange() && cellsIntTemp[k][m] != WALL && world.isVisible(trooper.getVisionRange(), trooper.getX(), trooper.getY(), trooper.getStance(), k, m, self.getStance())) {
@@ -1779,7 +1821,7 @@ public final class MyStrategy implements Strategy {
                 }
             }
         } else {
-            for (Trooper trooper : listOfEnemys) {
+            for (Trooper trooper : listOfEnemyTroopers) {
                 for (int k = 0; k < W; k++) {
                     for (int m = 0; m < H; m++) {
                         if (trooper.getDistanceTo(k, m) <= trooper.getShootingRange() && cellsIntTemp[k][m] != WALL && world.isVisible(trooper.getShootingRange(), trooper.getX(), trooper.getY(), trooper.getStance(), k, m, self.getStance())) {
@@ -2185,7 +2227,7 @@ public final class MyStrategy implements Strategy {
 
         if (targetTrooper != null && self.getHitpoints() < 65) {
             boolean safePlace = true;
-            for (Trooper trooper : listOfEnemys) {
+            for (Trooper trooper : listOfEnemyTroopers) {
                 if (canSeeOrCanShoot(trooper, self, false) || canSeeOrCanShoot(trooper, self, true)) {
                     safePlace = false;
                     break;
@@ -2248,7 +2290,7 @@ public final class MyStrategy implements Strategy {
                     if (targetHeal != null && self.getDistanceTo(targetHeal) <= 1) {
                         if (targetHeal.getId() == self.getId() && targetTrooper != null && self.getHitpoints() < 65) {
                             boolean safePlace = true;
-                            for (Trooper trooper : listOfEnemys) {
+                            for (Trooper trooper : listOfEnemyTroopers) {
                                 if (canSeeOrCanShoot(trooper, self, false) || canSeeOrCanShoot(trooper, self, true)) {
                                     safePlace = false;
                                     break;
@@ -2302,7 +2344,7 @@ public final class MyStrategy implements Strategy {
                             goUpStance = 0;
                         }
                         actionPoints -= goUpStance;
-                        for (Trooper trooper : listOfEnemys) {
+                        for (Trooper trooper : listOfEnemyTroopers) {
                             if (self.getDistanceTo(trooper) <= self.getVisionRange() && tempPath != null && tempPath.size() != 0 && tempPath.size() != 1 && tempPath.size() - 1 > actionPoints / game.getStandingMoveCost()/*tempPath.size() - 1 >= self.getDistanceTo(targetHeal) + 5*/) {
                                 canMove = false;
                             }
@@ -2332,7 +2374,7 @@ public final class MyStrategy implements Strategy {
                             if (self.getDistanceTo(trooper) <= 1) {
                                 if (targetHeal.getId() == self.getId() && targetTrooper != null && self.getHitpoints() < 76) {
                                     boolean safePlace = true;
-                                    for (Trooper trooper2 : listOfEnemys) {
+                                    for (Trooper trooper2 : listOfEnemyTroopers) {
                                         if (canSeeOrCanShoot(trooper2, self, false) || canSeeOrCanShoot(trooper2, self, true)) {
                                             safePlace = false;
                                             break;
@@ -2657,58 +2699,60 @@ public final class MyStrategy implements Strategy {
 
     //возвращает null при броске гранаты, свои координаты если нету точки для броска или координаты точки(-ек) куда нужно бросить гранату, если расстояние до неё(-их) больше расстояния броска гранаты
     LinkedList<thePoint> takeAPointsForGrenadeThrow(Trooper self) {
+
         LinkedList<thePoint> listOfGrenadePoint = new LinkedList<>();
-        if (listOfEnemys.size() > 1) {
+
+        if (listOfEnemyTroopers.size() > 1) {
             thePoint targetPointForGrenade;
             int raznicaX;
             int raznicaY;
 
-            for (int i = 0; i <= listOfEnemys.size() - 2; i++) {
-                for (int j = i + 1; j <= listOfEnemys.size() - 1; j++) {
+            for (int i = 0; i <= listOfEnemyTroopers.size() - 2; i++) {
+                for (int j = i + 1; j <= listOfEnemyTroopers.size() - 1; j++) {
 
-                    if (Math.abs(listOfEnemys.get(i).getX() - listOfEnemys.get(j).getX()) <= 2 && Math.abs(listOfEnemys.get(i).getY() - listOfEnemys.get(j).getY()) <= 2 && listOfEnemys.get(i).getDistanceTo(listOfEnemys.get(j)) <= 2) {
+                    if (Math.abs(listOfEnemyTroopers.get(i).getX() - listOfEnemyTroopers.get(j).getX()) <= 2 && Math.abs(listOfEnemyTroopers.get(i).getY() - listOfEnemyTroopers.get(j).getY()) <= 2 && listOfEnemyTroopers.get(i).getDistanceTo(listOfEnemyTroopers.get(j)) <= 2) {
 
-                        raznicaX = listOfEnemys.get(i).getX() - listOfEnemys.get(j).getX();
+                        raznicaX = listOfEnemyTroopers.get(i).getX() - listOfEnemyTroopers.get(j).getX();
 
                         switch (raznicaX) {
                             case -2: {
-                                targetPointForGrenade = tryToUseGrenade(self, listOfEnemys.get(i).getX() + 1, listOfEnemys.get(i).getY());
+                                targetPointForGrenade = tryToUseGrenade(self, listOfEnemyTroopers.get(i).getX() + 1, listOfEnemyTroopers.get(i).getY());
                                 if (targetPointForGrenade != null) {
                                     listOfGrenadePoint.add(targetPointForGrenade);
                                 }
                                 break;
                             }
                             case -1: {
-                                raznicaY = listOfEnemys.get(i).getY() - listOfEnemys.get(j).getY();
+                                raznicaY = listOfEnemyTroopers.get(i).getY() - listOfEnemyTroopers.get(j).getY();
                                 switch (raznicaY) {
                                     case 1: {
-                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemys.get(i).getX() + 1, listOfEnemys.get(i).getY());
+                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemyTroopers.get(i).getX() + 1, listOfEnemyTroopers.get(i).getY());
                                         if (targetPointForGrenade != null) {
                                             listOfGrenadePoint.add(targetPointForGrenade);
                                         }
-                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemys.get(i).getX(), listOfEnemys.get(i).getY() - 1);
+                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemyTroopers.get(i).getX(), listOfEnemyTroopers.get(i).getY() - 1);
                                         if (targetPointForGrenade != null) {
                                             listOfGrenadePoint.add(targetPointForGrenade);
                                         }
                                         break;
                                     }
                                     case 0: {
-                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemys.get(i).getX(), listOfEnemys.get(i).getY());
+                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemyTroopers.get(i).getX(), listOfEnemyTroopers.get(i).getY());
                                         if (targetPointForGrenade != null) {
                                             listOfGrenadePoint.add(targetPointForGrenade);
                                         }
-                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemys.get(j).getX(), listOfEnemys.get(j).getY());
+                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemyTroopers.get(j).getX(), listOfEnemyTroopers.get(j).getY());
                                         if (targetPointForGrenade != null) {
                                             listOfGrenadePoint.add(targetPointForGrenade);
                                         }
                                         break;
                                     }
                                     case -1: {
-                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemys.get(i).getX() + 1, listOfEnemys.get(i).getY());
+                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemyTroopers.get(i).getX() + 1, listOfEnemyTroopers.get(i).getY());
                                         if (targetPointForGrenade != null) {
                                             listOfGrenadePoint.add(targetPointForGrenade);
                                         }
-                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemys.get(i).getX(), listOfEnemys.get(i).getY() + 1);
+                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemyTroopers.get(i).getX(), listOfEnemyTroopers.get(i).getY() + 1);
                                         if (targetPointForGrenade != null) {
                                             listOfGrenadePoint.add(targetPointForGrenade);
                                         }
@@ -2718,39 +2762,39 @@ public final class MyStrategy implements Strategy {
                                 break;
                             }
                             case 0: {
-                                raznicaY = listOfEnemys.get(i).getY() - listOfEnemys.get(j).getY();
+                                raznicaY = listOfEnemyTroopers.get(i).getY() - listOfEnemyTroopers.get(j).getY();
                                 switch (raznicaY) {
                                     case 2: {
-                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemys.get(i).getX(), listOfEnemys.get(i).getY() - 1);
+                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemyTroopers.get(i).getX(), listOfEnemyTroopers.get(i).getY() - 1);
                                         if (targetPointForGrenade != null) {
                                             listOfGrenadePoint.add(targetPointForGrenade);
                                         }
                                         break;
                                     }
                                     case 1: {
-                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemys.get(i).getX(), listOfEnemys.get(i).getY());
+                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemyTroopers.get(i).getX(), listOfEnemyTroopers.get(i).getY());
                                         if (targetPointForGrenade != null) {
                                             listOfGrenadePoint.add(targetPointForGrenade);
                                         }
-                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemys.get(j).getX(), listOfEnemys.get(j).getY());
+                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemyTroopers.get(j).getX(), listOfEnemyTroopers.get(j).getY());
                                         if (targetPointForGrenade != null) {
                                             listOfGrenadePoint.add(targetPointForGrenade);
                                         }
                                         break;
                                     }
                                     case -1: {
-                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemys.get(i).getX(), listOfEnemys.get(i).getY());
+                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemyTroopers.get(i).getX(), listOfEnemyTroopers.get(i).getY());
                                         if (targetPointForGrenade != null) {
                                             listOfGrenadePoint.add(targetPointForGrenade);
                                         }
-                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemys.get(j).getX(), listOfEnemys.get(j).getY());
+                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemyTroopers.get(j).getX(), listOfEnemyTroopers.get(j).getY());
                                         if (targetPointForGrenade != null) {
                                             listOfGrenadePoint.add(targetPointForGrenade);
                                         }
                                         break;
                                     }
                                     case -2: {
-                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemys.get(i).getX(), listOfEnemys.get(i).getY() - 1);
+                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemyTroopers.get(i).getX(), listOfEnemyTroopers.get(i).getY() - 1);
                                         if (targetPointForGrenade != null) {
                                             listOfGrenadePoint.add(targetPointForGrenade);
                                         }
@@ -2760,36 +2804,36 @@ public final class MyStrategy implements Strategy {
                                 break;
                             }
                             case 1: {
-                                raznicaY = listOfEnemys.get(i).getY() - listOfEnemys.get(j).getY();
+                                raznicaY = listOfEnemyTroopers.get(i).getY() - listOfEnemyTroopers.get(j).getY();
                                 switch (raznicaY) {
                                     case 1: {
-                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemys.get(i).getX() - 1, listOfEnemys.get(i).getY());
+                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemyTroopers.get(i).getX() - 1, listOfEnemyTroopers.get(i).getY());
                                         if (targetPointForGrenade != null) {
                                             listOfGrenadePoint.add(targetPointForGrenade);
                                         }
-                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemys.get(i).getX(), listOfEnemys.get(i).getY() - 1);
+                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemyTroopers.get(i).getX(), listOfEnemyTroopers.get(i).getY() - 1);
                                         if (targetPointForGrenade != null) {
                                             listOfGrenadePoint.add(targetPointForGrenade);
                                         }
                                         break;
                                     }
                                     case 0: {
-                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemys.get(i).getX(), listOfEnemys.get(i).getY());
+                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemyTroopers.get(i).getX(), listOfEnemyTroopers.get(i).getY());
                                         if (targetPointForGrenade != null) {
                                             listOfGrenadePoint.add(targetPointForGrenade);
                                         }
-                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemys.get(j).getX(), listOfEnemys.get(j).getY());
+                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemyTroopers.get(j).getX(), listOfEnemyTroopers.get(j).getY());
                                         if (targetPointForGrenade != null) {
                                             listOfGrenadePoint.add(targetPointForGrenade);
                                         }
                                         break;
                                     }
                                     case -1: {
-                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemys.get(i).getX() - 1, listOfEnemys.get(i).getY());
+                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemyTroopers.get(i).getX() - 1, listOfEnemyTroopers.get(i).getY());
                                         if (targetPointForGrenade != null) {
                                             listOfGrenadePoint.add(targetPointForGrenade);
                                         }
-                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemys.get(i).getX(), listOfEnemys.get(i).getY() + 1);
+                                        targetPointForGrenade = tryToUseGrenade(self, listOfEnemyTroopers.get(i).getX(), listOfEnemyTroopers.get(i).getY() + 1);
                                         if (targetPointForGrenade != null) {
                                             listOfGrenadePoint.add(targetPointForGrenade);
                                         }
@@ -2799,7 +2843,7 @@ public final class MyStrategy implements Strategy {
                                 break;
                             }
                             case 2: {
-                                targetPointForGrenade = tryToUseGrenade(self, listOfEnemys.get(i).getX() - 1, listOfEnemys.get(i).getY());
+                                targetPointForGrenade = tryToUseGrenade(self, listOfEnemyTroopers.get(i).getX() - 1, listOfEnemyTroopers.get(i).getY());
                                 if (targetPointForGrenade != null) {
                                     listOfGrenadePoint.add(targetPointForGrenade);
                                 }
@@ -2863,7 +2907,7 @@ public final class MyStrategy implements Strategy {
                     for (int i = x1; i <= x2; i++) {
                         for (int j = y1; j <= y2; j++) {
                             if(getDistancePointToPoint(point.getX(), point.getY(), i, j) <= 2) {
-                                for (Trooper trooper : listOfEnemys) {
+                                for (Trooper trooper : listOfEnemyTroopers) {
                                     if (trooper.getX() == i && trooper.getY() == j) {
                                         enemyCountNearPointOfGrenade++;
                                     }
@@ -3046,7 +3090,7 @@ public final class MyStrategy implements Strategy {
                 }
             } else {
                 if (targetTrooper != null) {
-                    for (Trooper trooper : listOfEnemys) {
+                    for (Trooper trooper : listOfEnemyTroopers) {
                         boolean canShoot;
                         if (self.getStance() == TrooperStance.STANDING) {
                             canShoot = world.isVisible(self.getShootingRange(), self.getX(), self.getY(), TrooperStance.KNEELING, trooper.getX(), trooper.getY(), trooper.getStance());
@@ -3211,7 +3255,7 @@ public final class MyStrategy implements Strategy {
         boolean isTargetNeedChange = true;
 
         if (targetTrooper != null) {
-            for (Trooper trooper : listOfEnemys) {
+            for (Trooper trooper : listOfEnemyTroopers) {
                 if (trooper.getX() == targetTrooper.getX() && trooper.getY() == targetTrooper.getY()) {
                     isTargetNeedChange = false;
                     break;
@@ -3225,8 +3269,8 @@ public final class MyStrategy implements Strategy {
 
         if (isTargetNeedChange) {
             targetTrooper = null;
-            if (listOfEnemys.size() != 0) {
-                Trooper choosenOne = chooseEnemyOnDistance(self, listOfEnemys);
+            if (listOfEnemyTroopers.size() != 0) {
+                Trooper choosenOne = chooseEnemyOnDistance(self, listOfEnemyTroopers);
                 if (choosenOne != null) {
                     targetTrooper = choosenOne;
                 }
@@ -3266,8 +3310,8 @@ public final class MyStrategy implements Strategy {
     //если может убить, то идёт и добивает полуживого юнита
     boolean goAndKillTarget (Trooper self) {
 
-        if (listOfEnemys.size() != 0) {
-            for(Trooper target : listOfEnemys) {
+        if (listOfEnemyTroopers.size() != 0) {
+            for(Trooper target : listOfEnemyTroopers) {
                 if (!(self.getDistanceTo(target) <= self.getShootingRange() && world.isVisible(self.getShootingRange(), self.getX(), self.getY(), self.getStance(), target.getX(), target.getY(), target.getStance()))) {
 
                     LinkedList<thePoint> tempList = lee(self, self.getX(), self.getY(), target.getX(), target.getY(), true);
@@ -3361,7 +3405,7 @@ public final class MyStrategy implements Strategy {
 
     boolean killAnyEnemyUnit(Trooper self) {
         //пытается убить любую вражескую цель, если она убиваема
-        for (Trooper trooper : listOfEnemys) {
+        for (Trooper trooper : listOfEnemyTroopers) {
             if (trooper.getHitpoints() / self.getDamage(self.getStance()) + 1 <= self.getActionPoints() / self.getShootCost()) {
                 if (canShootOnTarget(self, trooper)) {
                     shootOnTarget(self, trooper);
@@ -3636,7 +3680,7 @@ public final class MyStrategy implements Strategy {
 
             boolean isPosibleShootByEnemy = false;
 
-            for (Trooper trooper : listOfEnemys) {
+            for (Trooper trooper : listOfEnemyTroopers) {
                 if (canSeeOrCanShoot(trooper, self, true) || canSeeOrCanShoot(trooper, self, false)) {
                     isPosibleShootByEnemy = true;
                 }
@@ -3666,7 +3710,7 @@ public final class MyStrategy implements Strategy {
 
                     if (tempPath != null && tempPath.size() != 0 && tempPath.size() != 1 && (tempPath.size() - 1) * 2 + self.getShootCost() <= actionPoints) {
 
-                        for (Trooper trooper : listOfEnemys) {
+                        for (Trooper trooper : listOfEnemyTroopers) {
                             if (canShootOnTarget(self, trooper)) {
                                 shootOnTarget(self, trooper);
                                 return true;
