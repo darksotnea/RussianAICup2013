@@ -117,7 +117,7 @@ public final class MyStrategy implements Strategy {
             return;
         }
 
-        if (safeStance != null && safePoint != null && safePoint.getX() == self.getX() && safePoint.getY() == self.getY() && safeStance == self.getStance()) {
+        if (safeStance != null /*&& safePoint != null && safePoint.getX() == self.getX() && safePoint.getY() == self.getY()*/ && safeStance == self.getStance()) {
             safePoint = null;
             goToSafePlace = false;
             safeStance = null;
@@ -333,7 +333,7 @@ public final class MyStrategy implements Strategy {
         if (self.getActionPoints() >= 10) {
 
             boolean tempValue = hpIsChanged(self);
-            if(tempValue) {
+            if(tempValue && !istroopersUnderAttack) {
                 saveMoveWorld = world.getMoveIndex();
                 istroopersUnderAttack = tempValue;
             }
@@ -840,16 +840,14 @@ public final class MyStrategy implements Strategy {
             }
 
             if (goToSafePlace) {
-                if (self.getStance() != TrooperStance.STANDING) {
+                if (self.getStance() != TrooperStance.STANDING && !(self.getX() == safePoint.getX() && self.getY()== safePoint.getY())) {
                     move.setAction(ActionType.RAISE_STANCE);
                     return true;
                 }
                 if (safePoint.getX() == self.getX() && safePoint.getY() == self.getY()) {
-                    if (self.getStance() == TrooperStance.STANDING && safeStance == TrooperStance.KNEELING || self.getStance() == TrooperStance.KNEELING && safeStance == TrooperStance.PRONE) {
+                    if (self.getActionPoints() >= game.getStanceChangeCost() && (self.getStance() == TrooperStance.STANDING && safeStance == TrooperStance.KNEELING || self.getStance() == TrooperStance.KNEELING && safeStance == TrooperStance.PRONE)) {
                         goToSafePlace = false;
                         safePoint = null;
-                    }
-                    if(self.getActionPoints() >= game.getStanceChangeCost()) {
                         move.setAction(ActionType.LOWER_STANCE);
                         return true;
                     }
@@ -1808,35 +1806,39 @@ public final class MyStrategy implements Strategy {
 
     thePoint findNotAchievableTail(Trooper self, boolean seeOrShoot) {
         //находит ячейку недосягаемую для чужих юнитов
+        if(safeStance == null) {
+            boolean positionIsSafe1 = true;
+            boolean positionIsSafe2 = true;
 
-        boolean positionIsSafe1 = true;
-        boolean positionIsSafe2 = true;
+            for (Trooper trooper : listOfEnemyTroopers) {
+                if (self.getActionPoints() >= 2 && self.getStance() == TrooperStance.STANDING && world.isVisible(trooper.getVisionRange(), trooper.getX(), trooper.getY(), trooper.getStance(), self.getX(), self.getY(), TrooperStance.KNEELING)) {
+                    positionIsSafe1 = false;
+                    break;
+                }
+            }
 
-        for (Trooper trooper : listOfEnemyTroopers) {
-            if (self.getActionPoints() >= 2 && self.getStance() == TrooperStance.STANDING && world.isVisible(trooper.getVisionRange(), trooper.getX(), trooper.getY(), trooper.getStance(), self.getX(), self.getY(), TrooperStance.KNEELING)) {
-                positionIsSafe1 = false;
-                break;
+            for (Trooper trooper : listOfEnemyTroopers) {
+                if (self.getActionPoints() >= 4 && self.getStance() == TrooperStance.STANDING && world.isVisible(trooper.getVisionRange(), trooper.getX(), trooper.getY(), trooper.getStance(), self.getX(), self.getY(), TrooperStance.PRONE)) {
+                    positionIsSafe2 = false;
+                    break;
+                }
+                if (self.getActionPoints() >= 2 && self.getStance() == TrooperStance.KNEELING && world.isVisible(trooper.getVisionRange(), trooper.getX(), trooper.getY(), trooper.getStance(), self.getX(), self.getY(), TrooperStance.PRONE)) {
+                    positionIsSafe2 = false;
+                    break;
+                }
             }
-        }
 
-        for (Trooper trooper : listOfEnemyTroopers) {
-            if (self.getActionPoints() >= 4 && self.getStance() == TrooperStance.STANDING && world.isVisible(trooper.getVisionRange(), trooper.getX(), trooper.getY(), trooper.getStance(), self.getX(), self.getY(), TrooperStance.PRONE)) {
-                positionIsSafe2 = false;
-                break;
+            if (positionIsSafe1 || positionIsSafe2) {
+                goToSafePlace = true;
+                if (positionIsSafe1) {
+                    safeStance = TrooperStance.KNEELING;
+                } else if (positionIsSafe2) {
+                    safeStance = TrooperStance.PRONE;
+                }
+                safePoint = new thePoint(self.getX(), self.getY());
+                return safePoint;
             }
-            if (self.getActionPoints() >= 2 && self.getStance() == TrooperStance.KNEELING && world.isVisible(trooper.getVisionRange(), trooper.getX(), trooper.getY(), trooper.getStance(), self.getX(), self.getY(), TrooperStance.PRONE)) {
-                positionIsSafe2 = false;
-                break;
-            }
-        }
-
-        if (positionIsSafe1 || positionIsSafe2) {
-            goToSafePlace = true;
-            if (positionIsSafe1) {
-                safeStance = TrooperStance.KNEELING;
-            } else if (positionIsSafe2) {
-                safeStance = TrooperStance.PRONE;
-            }
+        } else {
             safePoint = new thePoint(self.getX(), self.getY());
             return safePoint;
         }
@@ -1845,7 +1847,7 @@ public final class MyStrategy implements Strategy {
         if ((self.getType() == TrooperType.COMMANDER || self.getType() == TrooperType.SCOUT) && pathOfTrooper!= null && pathOfTrooper.size() >= 3) { //TODO возможно сделать для всех
             positionIsSafe = true;
             for (Trooper trooper : listOfEnemyTroopers) {
-                if (world.isVisible(trooper.getShootingRange(), trooper.getX(), trooper.getY(), trooper.getStance(), pathOfTrooper.get(pathOfTrooper.size() - 2).getX(), pathOfTrooper.get(pathOfTrooper.size() - 2).getY(), TrooperStance.STANDING)) {
+                if (world.isVisible(trooper.getVisionRange(), trooper.getX(), trooper.getY(), trooper.getStance(), pathOfTrooper.get(pathOfTrooper.size() - 2).getX(), pathOfTrooper.get(pathOfTrooper.size() - 2).getY(), TrooperStance.STANDING)) {
                     positionIsSafe = false;
                     break;
                 }
@@ -2298,7 +2300,7 @@ public final class MyStrategy implements Strategy {
                 thePoint tempPoint2 = findNotAchievableTail(self, false);
                 thePoint tempPoint;
 
-                if (self.getX() == tempPoint1.getX() && self.getY() == tempPoint1.getY()) {
+                if (tempPoint1 != null &&self.getX() == tempPoint1.getX() && self.getY() == tempPoint1.getY()) {
                     if(self.getActionPoints() >= game.getStanceChangeCost()) {
                         move.setAction(ActionType.LOWER_STANCE);
                         return true;
@@ -2368,7 +2370,7 @@ public final class MyStrategy implements Strategy {
                                 thePoint tempPoint2 = findNotAchievableTail(self, false);
                                 thePoint tempPoint;
 
-                                if (self.getX() == tempPoint1.getX() && self.getY() == tempPoint1.getY()) {
+                                if (tempPoint1 != null && self.getX() == tempPoint1.getX() && self.getY() == tempPoint1.getY()) {
                                     if(self.getActionPoints() >= game.getStanceChangeCost()) {
                                         move.setAction(ActionType.LOWER_STANCE);
                                         return true;
@@ -2459,7 +2461,7 @@ public final class MyStrategy implements Strategy {
                                         thePoint tempPoint2 = findNotAchievableTail(self, false);
                                         thePoint tempPoint;
 
-                                        if (self.getX() == tempPoint1.getX() && self.getY() == tempPoint1.getY()) {
+                                        if (tempPoint1 != null && self.getX() == tempPoint1.getX() && self.getY() == tempPoint1.getY()) {
                                             if(self.getActionPoints() >= game.getStanceChangeCost()) {
                                                 move.setAction(ActionType.LOWER_STANCE);
                                                 return true;
@@ -3564,9 +3566,11 @@ public final class MyStrategy implements Strategy {
 
 
     boolean underAttack(Trooper self) {
-        if (istroopersUnderAttack && trooperUnderAttack == self.getId() && targetTrooper == null) {
+        if (istroopersUnderAttack && trooperUnderAttack == self.getId() && (targetTrooper == null || listOfEnemys.size() == 0)) {
             if (goOnWar(self, localTargetX != 100 ? localTargetX : globalTargetX, localTargetY != 100 ? localTargetY : globalTargetY)) {
-                istroopersUnderAttack = false;
+                if (move.getAction() == ActionType.MOVE) {
+                    istroopersUnderAttack = false;
+                }
                 return true;
             }
         }
@@ -3631,7 +3635,7 @@ public final class MyStrategy implements Strategy {
         if (self.getHitpoints() < 40 && isJitters) {
             thePoint point = findNotAchievableTail(self, true);
 
-            if (self.getX() == point.getX() && self.getY() == point.getY()) {
+            if (point != null && self.getX() == point.getX() && self.getY() == point.getY()) {
                 if(self.getActionPoints() >= game.getStanceChangeCost()) {
                     move.setAction(ActionType.LOWER_STANCE);
                     return true;
@@ -3814,7 +3818,7 @@ public final class MyStrategy implements Strategy {
                 thePoint point2 = findNotAchievableTail(self, true);
                 thePoint point;
 
-                if (self.getX() == point1.getX() && self.getY() == point1.getY()) {
+                if (point1 != null && self.getX() == point1.getX() && self.getY() == point1.getY()) {
 
                     int goDownStance = 0;
                     if (safeStance == TrooperStance.KNEELING && self.getStance() == TrooperStance.STANDING) {
@@ -4082,14 +4086,14 @@ public final class MyStrategy implements Strategy {
 
         thePoint point = findNotAchievableTail(self, canSeeOrShoot);
 
-        if (self.getX() == point.getX() && self.getY() == point.getY()) {
+        if (point != null && self.getX() == point.getX() && self.getY() == point.getY()) {
 
             int goDownStance = 0;
-            if (safeStance == TrooperStance.KNEELING && self.getStance() == TrooperStance.STANDING) {
+            if (self.getStance() == TrooperStance.STANDING && safeStance == TrooperStance.KNEELING) {
                 goDownStance = 2;
-            } else if (safeStance == TrooperStance.PRONE && self.getStance() == TrooperStance.KNEELING) {
+            } else if (self.getStance() == TrooperStance.KNEELING && safeStance == TrooperStance.PRONE) {
                 goDownStance = 2;
-            } else if (safeStance == TrooperStance.PRONE && self.getStance() == TrooperStance.STANDING) {
+            } else if (self.getStance() == TrooperStance.STANDING && safeStance == TrooperStance.PRONE) {
                 goDownStance = 4;
             }
 
