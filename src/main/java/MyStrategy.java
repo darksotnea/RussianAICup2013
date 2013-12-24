@@ -44,7 +44,7 @@ public final class MyStrategy implements Strategy {
     private static boolean isOrder = false;
     private static LinkedList<TrooperType> listOfOrderMovesOfTroopers = new LinkedList<>();
     private static LinkedList<Player> listOfOrderMovesOfPlayers = new LinkedList<>();
-    private static LinkedList<Player> listOfOrderMovesOfPlayersTemp = new LinkedList<>();
+    private static Player[] listOfOrderMovesOfPlayersTemp = null;
     private static TrooperType lastTrooperType;
     private static Trooper targetTrooper = null;
     private static LinkedList<Trooper> listOfEnemys;
@@ -4247,7 +4247,7 @@ public final class MyStrategy implements Strategy {
                         if(listOfOrderMovesOfPlayers.size() == 0) {
                             listOfOrderMovesOfPlayers.add(player);
                         }
-                    } else {
+                    } else if (listOfOrderMovesOfPlayersTemp != null) {
                         for (Player player1 : listOfOrderMovesOfPlayersTemp) {
                             if (player.getId() == player1.getId() && player.getScore() != player1.getScore()) {
 
@@ -4265,11 +4265,39 @@ public final class MyStrategy implements Strategy {
                                                 }
                                             }
                                             if (!isConsist) {
-                                                listOfOrderMovesOfPlayers.addFirst(player);
+                                                listOfOrderMovesOfPlayers.addLast(player);
                                             }
                                         }
                                     }
+                                } else {
 
+                                    TrooperType trooperType1;
+                                    int i = listOfOrderMovesOfTroopers.indexOf(TrooperType.SNIPER);
+
+                                    if (i == listOfOrderMovesOfTroopers.size() - 1) {
+                                        i = 0;
+                                    } else {
+                                        i = i + 1;
+                                    }
+
+                                    trooperType1 = listOfOrderMovesOfTroopers.get(i);
+
+                                    if (self.getType() == trooperType1 && scoreDifference >= 0) {
+                                        for (TrooperStance trooperStance : TrooperStance.values()) {
+                                            int damage = getDamageTrooperInStance(self.getType(), trooperStance);
+                                            if (scoreDifference < 145 && scoreDifference != 60 && scoreDifference != 80 && scoreDifference != 85 && scoreDifference != 105 && scoreDifference != 120 && scoreDifference != 140 && (scoreDifference % damage == 0 || (scoreDifference < damage) ? false : (scoreDifference - 25) % damage == 0 || (scoreDifference < damage) ? false : (scoreDifference - 50) % damage == 0)) {
+                                                boolean isConsist = false;
+                                                for (Player player2 : listOfOrderMovesOfPlayers) {
+                                                    if (player2.getId() == player.getId()) {
+                                                        isConsist = true;
+                                                    }
+                                                }
+                                                if (!isConsist) {
+                                                    listOfOrderMovesOfPlayers.addFirst(player);
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
 
                                 // ... по медику
@@ -4282,7 +4310,7 @@ public final class MyStrategy implements Strategy {
                                             }
                                         }
                                         if (!isConsist) {
-                                            listOfOrderMovesOfPlayers.addFirst(player);
+                                            listOfOrderMovesOfPlayers.addLast(player);
                                         }
                                     } else if(scoreDifference >= 0 ) {
                                         for (TrooperStance trooperStance : TrooperStance.values()) {
@@ -4295,7 +4323,48 @@ public final class MyStrategy implements Strategy {
                                                     }
                                                 }
                                                 if (!isConsist) {
-                                                    listOfOrderMovesOfPlayers.addFirst(player);
+                                                    listOfOrderMovesOfPlayers.addLast(player);
+                                                }
+                                            }
+                                        }
+                                    }
+                                } else {
+
+                                    TrooperType trooperType1;
+                                    int i = listOfOrderMovesOfTroopers.indexOf(TrooperType.FIELD_MEDIC);
+
+                                    if (i == listOfOrderMovesOfTroopers.size() - 1) {
+                                        i = 0;
+                                    } else {
+                                        i = i + 1;
+                                    }
+
+                                    trooperType1 = listOfOrderMovesOfTroopers.get(i);
+
+                                    if (self.getType() == trooperType1) {
+                                        if (scoreDifference < 0 && scoreDifference != -30 && scoreDifference != -50 && (scoreDifference % 3 == 0 || scoreDifference % 5 == 0)) {
+                                            boolean isConsist = false;
+                                            for (Player player2 : listOfOrderMovesOfPlayers) {
+                                                if (player2.getId() == player.getId()) {
+                                                    isConsist = true;
+                                                }
+                                            }
+                                            if (!isConsist) {
+                                                listOfOrderMovesOfPlayers.addFirst(player);
+                                            }
+                                        } else if(scoreDifference >= 0 ) {
+                                            for (TrooperStance trooperStance : TrooperStance.values()) {
+                                                int damage = getDamageTrooperInStance(self.getType(), trooperStance);
+                                                if (scoreDifference < 105 && scoreDifference != 60 && scoreDifference != 80 && (scoreDifference % damage == 0 || (scoreDifference < damage) ? false : scoreDifference - 25 <= 0 ? false : (scoreDifference - 25) % damage == 0 || (scoreDifference < damage) ? false : scoreDifference - 50 <= 5 ? false : (scoreDifference - 50) % damage == 0)) {
+                                                    boolean isConsist = false;
+                                                    for (Player player2 : listOfOrderMovesOfPlayers) {
+                                                        if (player2.getId() == player.getId()) {
+                                                            isConsist = true;
+                                                        }
+                                                    }
+                                                    if (!isConsist) {
+                                                        listOfOrderMovesOfPlayers.addFirst(player);
+                                                    }
                                                 }
                                             }
                                         }
@@ -4314,7 +4383,36 @@ public final class MyStrategy implements Strategy {
                                                 }
                                             }
                                             if (!isConsist) {
-                                                listOfOrderMovesOfPlayers.addFirst(player);
+                                                listOfOrderMovesOfPlayers.addLast(player);
+                                            }
+                                        }
+                                    }
+                                } else {
+
+                                    TrooperType trooperType1;
+                                    int i = listOfOrderMovesOfTroopers.indexOf(TrooperType.COMMANDER);
+
+                                    if (i == listOfOrderMovesOfTroopers.size() - 1) {
+                                        i = 0;
+                                    } else {
+                                        i = i + 1;
+                                    }
+
+                                    trooperType1 = listOfOrderMovesOfTroopers.get(i);
+
+                                    if (self.getType() == trooperType1 && scoreDifference >= 0) {
+                                        for (TrooperStance trooperStance : TrooperStance.values()) {
+                                            int damage = getDamageTrooperInStance(self.getType(), trooperStance);
+                                            if (scoreDifference <= 150 && scoreDifference != 60 && scoreDifference != 80 && scoreDifference != 85 && scoreDifference != 105 && scoreDifference != 120 && scoreDifference != 140 && scoreDifference != 145 && (scoreDifference % damage == 0 || (scoreDifference < damage) ? false : scoreDifference - 25 <= 0 ? false : (scoreDifference - 25) % damage == 0 || (scoreDifference < damage) ? false : scoreDifference - 50 <= 5 ? false : (scoreDifference - 50) % damage == 0)) {
+                                                boolean isConsist = false;
+                                                for (Player player2 : listOfOrderMovesOfPlayers) {
+                                                    if (player2.getId() == player.getId()) {
+                                                        isConsist = true;
+                                                    }
+                                                }
+                                                if (!isConsist) {
+                                                    listOfOrderMovesOfPlayers.addLast(player);
+                                                }
                                             }
                                         }
                                     }
@@ -4323,6 +4421,7 @@ public final class MyStrategy implements Strategy {
                         }
                     }
                 }
+                listOfOrderMovesOfPlayersTemp = players;
             }
 
             if (listOfOrderMovesOfPlayers.size() == hpOfTroopers.length) {
