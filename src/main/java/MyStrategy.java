@@ -41,6 +41,11 @@ public final class MyStrategy implements Strategy {
     private int indexOfSniper;
     private int indexOfScout;
     private final Random random = new Random();
+    private static boolean isOrder = false;
+    private static LinkedList<TrooperType> listOfOrderMovesOfTroopers = new LinkedList<>();
+    private static LinkedList<Player> listOfOrderMovesOfPlayers = new LinkedList<>();
+    private static LinkedList<Player> listOfOrderMovesOfPlayersTemp = new LinkedList<>();
+    private static TrooperType lastTrooperType;
     private static Trooper targetTrooper = null;
     private static LinkedList<Trooper> listOfEnemys;
     private static LinkedList<Trooper> pathOfTrooper = new LinkedList<>();
@@ -93,6 +98,7 @@ public final class MyStrategy implements Strategy {
 
         troopers = world.getTroopers();
         bonuses = world.getBonuses();
+        lastTrooperType = self.getType();
 
         //строим карту с приоритетом ячеек
         trueMapOfPoints = getMapOfPoints(self);
@@ -358,6 +364,8 @@ public final class MyStrategy implements Strategy {
             move.setAction(ActionType.END_TURN);
             return;
         }
+
+        orderMove(self);
 
         //TODO   @@@@@@@@@@@@@@@@@@@@@@@         КОМАНДОР             @@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -4213,6 +4221,193 @@ public final class MyStrategy implements Strategy {
         }
 
         return false;
+    }
+
+    private void orderMove(Trooper self) {
+        if(!isOrder) {
+
+            if (listOfOrderMovesOfTroopers.size() != hpOfTroopers.length) {
+                boolean isContains = true;
+                for (TrooperType trooperType : listOfOrderMovesOfTroopers) {
+                    if (self.getType() == trooperType) {
+                        isContains = false;
+                    }
+                }
+                if (isContains) {
+                    listOfOrderMovesOfTroopers.add(self.getType());
+                }
+            }
+
+            if (listOfOrderMovesOfTroopers.size() == hpOfTroopers.length) {         //Здесь именно Troopers! Проверка на заполненность предыдущего списка.
+
+                Player[] players = world.getPlayers();
+
+                for (Player player : players) {
+                    if (player.getName().equals("darkstone")) {
+                        if(listOfOrderMovesOfPlayers.size() == 0) {
+                            listOfOrderMovesOfPlayers.add(player);
+                        }
+                    } else {
+                        for (Player player1 : listOfOrderMovesOfPlayersTemp) {
+                            if (player.getId() == player1.getId() && player.getScore() != player1.getScore()) {
+
+                                int scoreDifference = player.getScore() - player1.getScore();
+
+                                //пытаемся определить порядох ходов игроков по снайперу
+                                if (self.getType() == TrooperType.SNIPER && scoreDifference >= 0) {
+                                    for (TrooperStance trooperStance : TrooperStance.values()) {
+                                        int damage = getDamageTrooperInStance(self.getType(), trooperStance);
+                                        if (scoreDifference < 145 && scoreDifference != 60 && scoreDifference != 80 && scoreDifference != 85 && scoreDifference != 105 && scoreDifference != 120 && scoreDifference != 140 && (scoreDifference % damage == 0 || (scoreDifference < damage) ? false : (scoreDifference - 25) % damage == 0 || (scoreDifference < damage) ? false : (scoreDifference - 50) % damage == 0)) {
+                                            boolean isConsist = false;
+                                            for (Player player2 : listOfOrderMovesOfPlayers) {
+                                                if (player2.getId() == player.getId()) {
+                                                    isConsist = true;
+                                                }
+                                            }
+                                            if (!isConsist) {
+                                                listOfOrderMovesOfPlayers.addFirst(player);
+                                            }
+                                        }
+                                    }
+
+                                }
+
+                                // ... по медику
+                                if (self.getType() == TrooperType.FIELD_MEDIC) {
+                                    if (scoreDifference < 0 && scoreDifference != -30 && scoreDifference != -50 && (scoreDifference % 3 == 0 || scoreDifference % 5 == 0)) {
+                                        boolean isConsist = false;
+                                        for (Player player2 : listOfOrderMovesOfPlayers) {
+                                            if (player2.getId() == player.getId()) {
+                                                isConsist = true;
+                                            }
+                                        }
+                                        if (!isConsist) {
+                                            listOfOrderMovesOfPlayers.addFirst(player);
+                                        }
+                                    } else if(scoreDifference >= 0 ) {
+                                        for (TrooperStance trooperStance : TrooperStance.values()) {
+                                            int damage = getDamageTrooperInStance(self.getType(), trooperStance);
+                                            if (scoreDifference < 105 && scoreDifference != 60 && scoreDifference != 80 && (scoreDifference % damage == 0 || (scoreDifference < damage) ? false : scoreDifference - 25 <= 0 ? false : (scoreDifference - 25) % damage == 0 || (scoreDifference < damage) ? false : scoreDifference - 50 <= 5 ? false : (scoreDifference - 50) % damage == 0)) {
+                                                boolean isConsist = false;
+                                                for (Player player2 : listOfOrderMovesOfPlayers) {
+                                                    if (player2.getId() == player.getId()) {
+                                                        isConsist = true;
+                                                    }
+                                                }
+                                                if (!isConsist) {
+                                                    listOfOrderMovesOfPlayers.addFirst(player);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // ... по командиру
+                                if (self.getType() == TrooperType.COMMANDER && scoreDifference >= 0) {
+                                    for (TrooperStance trooperStance : TrooperStance.values()) {
+                                        int damage = getDamageTrooperInStance(self.getType(), trooperStance);
+                                        if (scoreDifference <= 150 && scoreDifference != 60 && scoreDifference != 80 && scoreDifference != 85 && scoreDifference != 105 && scoreDifference != 120 && scoreDifference != 140 && scoreDifference != 145 && (scoreDifference % damage == 0 || (scoreDifference < damage) ? false : scoreDifference - 25 <= 0 ? false : (scoreDifference - 25) % damage == 0 || (scoreDifference < damage) ? false : scoreDifference - 50 <= 5 ? false : (scoreDifference - 50) % damage == 0)) {
+                                            boolean isConsist = false;
+                                            for (Player player2 : listOfOrderMovesOfPlayers) {
+                                                if (player2.getId() == player.getId()) {
+                                                    isConsist = true;
+                                                }
+                                            }
+                                            if (!isConsist) {
+                                                listOfOrderMovesOfPlayers.addFirst(player);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (listOfOrderMovesOfPlayers.size() == hpOfTroopers.length) {
+                isOrder = true;
+            }
+        }
+    }
+
+
+    //TODO для вычисления урона заданного типа юнита в заданной стойке, возможно понадобиться при подсчёте всех живых юнитов в игре
+    int getDamageTrooperInStance(TrooperType trooperType, TrooperStance trooperStance) {
+        switch (trooperType) {
+
+            case FIELD_MEDIC: {
+
+                switch (trooperStance) {
+
+                    case STANDING: return 9;
+
+                    case KNEELING: return 12;
+
+                    case PRONE: return 15;
+                }
+
+                break;
+            }
+
+            case COMMANDER: {
+
+                switch (trooperStance) {
+
+                    case STANDING: return 15;
+
+                    case KNEELING: return 20;
+
+                    case PRONE: return 25;
+                }
+
+                break;
+            }
+
+            case SOLDIER: {
+
+                switch (trooperStance) {
+
+                    case STANDING: return 25;
+
+                    case KNEELING: return 30;
+
+                    case PRONE: return 35;
+                }
+
+                break;
+            }
+
+            case SNIPER: {
+
+                switch (trooperStance) {
+
+                    case STANDING: return 65;
+
+                    case KNEELING: return 80;
+
+                    case PRONE: return 95;
+                }
+
+                break;
+            }
+
+            case SCOUT: {
+
+                switch (trooperStance) {
+
+                    case STANDING: return 20;
+
+                    case KNEELING: return 25;
+
+                    case PRONE: return 30;
+                }
+
+                break;
+            }
+        }
+
+        return 0;
     }
 
     private class GameUnit {
