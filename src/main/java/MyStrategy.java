@@ -790,7 +790,7 @@ public final class MyStrategy implements Strategy {
                 if(self.getDistanceTo(localTargetX, localTargetY) > self.getShootingRange()) {
                     if (self.getDistanceTo(localTargetX, localTargetY) <= self.getShootingRange() + 2 && self.getStance() == TrooperStance.STANDING || self.getDistanceTo(localTargetX, localTargetY) <= self.getShootingRange() + 1 && self.getStance() == TrooperStance.KNEELING) {
                         for (GameUnit gameUnit : listOfSowEnemys) {
-                            if (world.isVisible(self.getShootingRange() + 2, self.getX(), self.getY(), self.getStance(), gameUnit.trooper.getX(), gameUnit.trooper.getY(), gameUnit.trooper.getStance())) {
+                            if (self.getType() != TrooperType.SNIPER && world.isVisible(self.getShootingRange() + 2, self.getX(), self.getY(), self.getStance(), gameUnit.trooper.getX(), gameUnit.trooper.getY(), gameUnit.trooper.getStance()) || self.getType() == TrooperType.SNIPER && world.isVisible(self.getShootingRange() - 2, self.getX(), self.getY(), self.getStance(), gameUnit.trooper.getX(), gameUnit.trooper.getY(), gameUnit.trooper.getStance())) {
                                 if(self.getActionPoints() >= game.getStanceChangeCost()) {
                                     move.setAction(ActionType.LOWER_STANCE);
                                     return;
