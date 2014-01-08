@@ -75,6 +75,7 @@ public final class MyStrategy implements Strategy {
     private static boolean isUseLastMove = false;
     private TrooperStance safeStance;
     private static int forwardTrooper = -1;
+    private Bonus bonusTarget = null;
 
     @Override
     public void move(Trooper self, World world, Game game, Move move) {
@@ -110,6 +111,9 @@ public final class MyStrategy implements Strategy {
 
             savedTrooperId = -1;
             idOfTrooperStop = -1;
+
+            bonusTarget = null;
+            goToBonus = false;
         }
 
         lastTrooperType = self.getType();
@@ -284,6 +288,17 @@ public final class MyStrategy implements Strategy {
                                     break;
                                 }
                             }
+                        } else if (trooper1.isTeammate() && world.isVisible(trooper1.getVisionRange(), trooper1.getX(), trooper1.getY(), trooper1.getStance(), gameUnit.trooper.getX(), gameUnit.trooper.getY(), TrooperStance.PRONE)) {
+                            for (Trooper trooper : listOfEnemys) {
+                                if (trooper.getX() == gameUnit.trooper.getX() && trooper.getY() == gameUnit.trooper.getY()) {
+                                    isOldOutdated = false;
+                                    break;
+                                }
+                            }
+                        } else if (trooper1.isTeammate() && trooper1.getDistanceTo(gameUnit.trooper) <= trooper1.getVisionRange() && !world.isVisible(trooper1.getVisionRange(), trooper1.getX(), trooper1.getY(), trooper1.getStance(), gameUnit.trooper.getX(), gameUnit.trooper.getY(), TrooperStance.PRONE)) {
+                            gameUnit.trooper = new Trooper(gameUnit.trooper.getId(), gameUnit.trooper.getX(), gameUnit.trooper.getY(), gameUnit.trooper.getPlayerId(), gameUnit.trooper.getTeammateIndex(), gameUnit.trooper.isTeammate(), gameUnit.trooper.getType(), TrooperStance.PRONE, gameUnit.trooper.getHitpoints(), gameUnit.trooper.getMaximalHitpoints(), gameUnit.trooper.getActionPoints(), gameUnit.trooper.getInitialActionPoints(), gameUnit.trooper.getVisionRange(), gameUnit.trooper.getShootingRange(), gameUnit.trooper.getShootCost(), gameUnit.trooper.getStandingDamage(), gameUnit.trooper.getKneelingDamage(), gameUnit.trooper.getProneDamage(), gameUnit.trooper.getDamage(), gameUnit.trooper.isHoldingGrenade(), gameUnit.trooper.isHoldingMedikit(), gameUnit.trooper.isHoldingFieldRation());
+                            isOldOutdated = false;
+                            break;
                         } else {
                             if(trooper1.isTeammate()) {
                                 count++;
@@ -921,6 +936,14 @@ public final class MyStrategy implements Strategy {
                     return true;
                 }
 
+                //если юнит идёт к бонусу, AP < 4 и бонус лежит на клетке trueMap которой < 5, то юнит завершает ход
+                if (bonusTarget != null && goToBonus && pathOfTrooper.get(1).getX() == bonusTarget.getX() && pathOfTrooper.get(1).getY() == bonusTarget.getY() && trueMapOfPoints[pathOfTrooper.get(1).getX()][pathOfTrooper.get(1).getY()] < 5 && self.getActionPoints() < 4) {
+                    bonusTarget = null;
+                    goToBonus = false;
+                    move.setAction(ActionType.END_TURN);
+                    return true;
+                }
+
                 //избегание плохих позиций, если следующая ячейка в таблице trueMapOfPoints == 2, то тогда если её можно обойти за кол-во ходов текущего пути + 5, идём в обход, если нельзя, то встаём и пробуем пройти уже в положении STANDING.
                 if (trueMapOfPoints[pathOfTrooper.get(1).getX()][pathOfTrooper.get(1).getY()] == 2 && self.getActionPoints() < 2 * getCostMoveWithStance(self) && !goToSafePlace && !goThrowGrenade && !goToBonus) {
                     if (self.getActionPoints() >= getCostMoveWithStance(self)) {
@@ -974,6 +997,10 @@ public final class MyStrategy implements Strategy {
 
                 if (testOnTrueMap(self, pathOfTrooper)) {
                     return true;
+                }
+
+                if (bonusTarget != null && move.getX() == bonusTarget.getX() && move.getY() == bonusTarget.getY()) {
+                    bonusTarget = null;
                 }
 
                 if (!(self.getX() == move.getX() && self.getY() == move.getY())) {
@@ -1253,7 +1280,11 @@ public final class MyStrategy implements Strategy {
 
             if (targetTrooper != null && self.getActionPoints() >= getCostMoveWithStance(self) && !world.isVisible(self.getShootingRange(), self.getX(), self.getY(), self.getStance(), targetTrooper.getX(), targetTrooper.getY(), targetTrooper.getStance())) {
 
-                if (testMoveUpAttack(self, targetTrooper)) {
+                if (self.getStance() != TrooperStance.PRONE && testMoveDownAttack(self, targetTrooper)) {
+                    return true;
+                }
+
+                if (self.getStance() != TrooperStance.STANDING && testMoveUpAttack(self, targetTrooper)) {
                     return true;
                 }
 
@@ -1286,8 +1317,8 @@ public final class MyStrategy implements Strategy {
             }
 
         } else {
-            //обработка бонусов, их подбор если нет в наличии
 
+            //идём в точку спасения или ложимся, если так можно спрятаться
             if (safePoint != null) {
                 if (safePoint.getX() == self.getX() && safePoint.getY() == self.getY()) {
                     if(self.getActionPoints() >= game.getStanceChangeCost()) {
@@ -1340,7 +1371,14 @@ public final class MyStrategy implements Strategy {
                 }
             }
 
+            //обработка бонусов, их подбор если нет в наличии
             if (bonuses != null) {
+
+                if (bonusTarget != null) {
+                    if (goOnPath(self, bonusTarget.getX(), bonusTarget.getY(), true)) {
+                        return true;
+                    }
+                }
 
                 for (Bonus bonus : bonuses) {
                     boolean isGoToBonus = true;
@@ -1358,18 +1396,21 @@ public final class MyStrategy implements Strategy {
 
                     if (isGoToBonus && self.getDistanceTo(bonus) <= 3 && !self.isHoldingGrenade() && bonus.getType() == BonusType.GRENADE) {
                         goToBonus = true;
+                        bonusTarget = bonus;
                         if (goOnPath(self, bonus.getX(), bonus.getY(), true)) {
                             return true;
                         }
                     }
                     if (isGoToBonus && self.getDistanceTo(bonus) <= 3 && !self.isHoldingMedikit() && bonus.getType() == BonusType.MEDIKIT) {
                         goToBonus = true;
+                        bonusTarget = bonus;
                         if (goOnPath(self, bonus.getX(), bonus.getY(), true)) {
                             return true;
                         }
                     }
                     if (isGoToBonus && self.getDistanceTo(bonus) <= 3 && !self.isHoldingFieldRation() && bonus.getType() == BonusType.FIELD_RATION) {
                         goToBonus = true;
+                        bonusTarget = bonus;
                         if (goOnPath(self, bonus.getX(), bonus.getY(), true)) {
                             return true;
                         }
@@ -3549,7 +3590,7 @@ public final class MyStrategy implements Strategy {
     boolean killAnyEnemyUnit(Trooper self) {
         //пытается убить любую вражескую цель, если она убиваема
         for (Trooper trooper : listOfEnemyTroopers) {
-            if (trooper.getHitpoints() / self.getDamage(self.getStance()) + 1 <= self.getActionPoints() / self.getShootCost()) {
+            if ((trooper.getHitpoints() % self.getDamage(self.getStance()) == 0 ? trooper.getHitpoints() / self.getDamage(self.getStance()) : trooper.getHitpoints() / self.getDamage(self.getStance()) + 1) <= self.getActionPoints() / self.getShootCost()) {
                 if (canShootOnTarget(self, trooper)) {
                     shootOnTarget(self, trooper);
                     return true;
@@ -3573,7 +3614,7 @@ public final class MyStrategy implements Strategy {
     }
 
 
-    //TODO если хп юнита меняется, а врага не было видно, значит вряг рядом и нужно что-то делать, реализовать
+    //TODO если хп юнита меняется, а врага не было видно, значит враг рядом и нужно что-то делать, реализовать
     boolean hpIsChanged(Trooper self) {
         //TODO добавить вычисление направления и передвижения в эту сторону на 2-3 хода
         if (targetTrooper == null) {
@@ -4256,6 +4297,34 @@ public final class MyStrategy implements Strategy {
         } else if (goUpStance == 4) {
             if(self.getActionPoints() >= game.getStanceChangeCost()) {
                 move.setAction(ActionType.RAISE_STANCE);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    boolean testMoveDownAttack(Trooper self, Trooper target) {
+
+        int goDownStance = 0;
+        if (world.isVisible(self.getShootingRange(), self.getX(), self.getY(), self.getStance(), target.getX(), target.getY(), target.getStance())) {
+            goDownStance = 0;
+        } else if (self.getStance() == TrooperStance.KNEELING && world.isVisible(self.getShootingRange(), self.getX(), self.getY(), TrooperStance.PRONE, target.getX(), target.getY(), target.getStance())) {
+            goDownStance = 2;
+        } else if (self.getStance() == TrooperStance.STANDING && world.isVisible(self.getShootingRange(), self.getX(), self.getY(), TrooperStance.KNEELING, target.getX(), target.getY(), target.getStance())) {
+            goDownStance = 2;
+        } else if (self.getStance() == TrooperStance.STANDING && world.isVisible(self.getShootingRange(), self.getX(), self.getY(), TrooperStance.PRONE, target.getX(), target.getY(), target.getStance())) {
+            goDownStance = 4;
+        }
+
+        if (goDownStance == 2) {
+            if(self.getActionPoints() >= game.getStanceChangeCost()) {
+                move.setAction(ActionType.LOWER_STANCE);
+                return true;
+            }
+        } else if (goDownStance == 4) {
+            if(self.getActionPoints() >= game.getStanceChangeCost()) {
+                move.setAction(ActionType.LOWER_STANCE);
                 return true;
             }
         }
