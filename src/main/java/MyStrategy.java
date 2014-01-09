@@ -218,6 +218,9 @@ public final class MyStrategy implements Strategy {
                             unit.worldMove = world.getMoveIndex();
                             break;
                         } else if (unit.trooper.getId() == targetUnitIdSave) {
+                            if (targetTrooper != null && targetTrooper.getId() == targetUnitIdSave) {
+                                targetTrooper = null;
+                            }
                             listOfSowEnemys.remove(unit);
                             break;
                         }
@@ -249,17 +252,21 @@ public final class MyStrategy implements Strategy {
                     if (gameUnit.trooper.getId() == trooper.getId() && (gameUnit.trooper.getX() != trooper.getX() || gameUnit.trooper.getY() != trooper.getY())) {
                         gameUnit.trooper = trooper;
                         gameUnit.worldMove = world.getMoveIndex();
+                        gameUnit.isNotInFog = true;
                         notHere = false;
                         break;
                     } else if (gameUnit.trooper.getId() == trooper.getId()) {
                         gameUnit.worldMove = world.getMoveIndex();
+                        gameUnit.isNotInFog = true;
                         notHere = false;
                     }
                 }
 
                 //если юнита нету в списке listOfSow, то добавляем его туда
                 if(notHere) {
-                    listOfSowEnemys.add(new GameUnit(trooper));
+                    GameUnit gameUnit = new GameUnit(trooper);
+                    listOfSowEnemys.add(gameUnit);
+                    gameUnit.isNotInFog = true;
                 }
             }
 
@@ -324,7 +331,9 @@ public final class MyStrategy implements Strategy {
             //если список listOfSow пуст, то добавляем в него всех из listOfEnemys
             if(listOfEnemys.size() != 0) {
                 for (Trooper trooper : listOfEnemys) {
-                    listOfSowEnemys.add(new GameUnit(trooper));
+                    GameUnit gameUnit = new GameUnit(trooper);
+                    listOfSowEnemys.add(gameUnit);
+                    gameUnit.isNotInFog = true;
                 }
             }
         }
@@ -349,9 +358,11 @@ public final class MyStrategy implements Strategy {
         if (listOfSowEnemys.size() != 0) {
             for (GameUnit gameUnit : listOfSowEnemys) {
                 boolean test = true;
+                gameUnit.isNotInFog = false;
                 for (Trooper trooper1 : listOfEnemyTroopers) {
                     if (gameUnit.trooper.getX() == trooper1.getX() && gameUnit.trooper.getY() == trooper1.getY()) {
                         test = false;
+                        gameUnit.isNotInFog = true;
                         break;
                     }
                 }
@@ -3196,6 +3207,30 @@ public final class MyStrategy implements Strategy {
 
 
     void shootOnTarget(Trooper self, Trooper target) {
+
+        boolean isInFog = false;
+
+        for (GameUnit gameUnit : listOfSowEnemys) {
+            if (target.getId() == gameUnit.trooper.getId()) {
+                isInFog = !gameUnit.isNotInFog;
+                break;
+            }
+        }
+
+        if (isInFog) {
+
+            isShootingAnywhere = true;
+            targetUnitIdSave = (int) target.getId();
+
+            for (Player player : world.getPlayers()) {
+                if (player.getName().equalsIgnoreCase("darkstone")) {
+                    myScore = player.getScore();
+                    break;
+                }
+            }
+
+        }
+
         if (self.getActionPoints() >= self.getShootCost() && self.getDistanceTo(target) <= self.getShootingRange()) {
             move.setAction(ActionType.SHOOT);
             move.setX(target.getX());
@@ -4770,10 +4805,17 @@ public final class MyStrategy implements Strategy {
     private class GameUnit {
         Trooper trooper;
         int worldMove;
+        boolean isNotInFog;
 
         GameUnit(Trooper troop) {
             trooper = troop;
             this.worldMove = world.getMoveIndex();
+            for (Trooper trooper1 : listOfEnemys) {
+                if (trooper1.getId() == trooper.getId()) {
+                    this.isNotInFog = true;
+                    break;
+                }
+            }
         }
     }
 
