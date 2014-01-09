@@ -3250,6 +3250,7 @@ public final class MyStrategy implements Strategy {
                         if (listOfPlayers1.player.getId() == player.getId() && !listOfPlayers1.isDead) {
                             if (indexOfCommander != -1) {
                                 needHelpFromAir = true;
+                                break;
                             }
                         }
                     }
@@ -3257,7 +3258,7 @@ public final class MyStrategy implements Strategy {
             }
         }
 
-        if (getHelpFromAir && targetTrooper == null && localTargetX == 100) {
+        if (getHelpFromAir && targetTrooper == null && localTargetX == 100 && indexOfCommander != -1) {
 
             //реагирование на crash стратегии для игры 4 х Х
             isEnemyStrategyCrashed = false;
