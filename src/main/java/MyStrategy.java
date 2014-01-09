@@ -839,7 +839,7 @@ public final class MyStrategy implements Strategy {
         if (self.getActionPoints() >= game.getStanceChangeCost()) {
 
             //встаём, если нет врагов и если находимся не в стоячей позиции
-            if (localTargetX == 100 && self.getStance() != TrooperStance.STANDING|| ( !(self.getActionPoints() < 4 && self.getStance() == TrooperStance.PRONE) && (listOfSowEnemys.size() == 0 && (self.getStance() != TrooperStance.STANDING && targetTrooper == null && self.getType() != TrooperType.SNIPER || self.getStance() != TrooperStance.STANDING && self.getType() == TrooperType.SNIPER && targetTrooper == null && !(localTargetX != 100 && world.isVisible(self.getVisionRange(), self.getX(), self.getY(), self.getStance(), localTargetX, localTargetY, TrooperStance.PRONE))))) ) {
+            if (localTargetX == 100 && self.getStance() != TrooperStance.STANDING || ( !(self.getActionPoints() < 4 && self.getStance() == TrooperStance.PRONE) && (listOfSowEnemys.size() == 0 && (self.getStance() != TrooperStance.STANDING && targetTrooper == null && self.getType() != TrooperType.SNIPER || self.getStance() != TrooperStance.STANDING && self.getType() == TrooperType.SNIPER && targetTrooper == null && !(localTargetX != 100 && world.isVisible(self.getVisionRange(), self.getX(), self.getY(), self.getStance(), localTargetX, localTargetY, TrooperStance.PRONE))))) ) {
                 move.setAction(ActionType.RAISE_STANCE);
                 return;
             }
@@ -3611,21 +3611,17 @@ public final class MyStrategy implements Strategy {
         int y1 = y - 1;
         int x2 = x + 1;
         int y2 = y + 1;
-        boolean flag = true;
-        do {
-            for (int i = x1; i <= x2; i++) {
-                for (int j = y1; j <= y2; j++) {
-                    if (i < world.getWidth() && i >= 0 && j < world.getHeight() && j >= 0) {
-                        if (trueMapOfPoints[i][j] > valueOfCell) {
-                            return new thePoint(i, j);
-                        }
+
+        for (int i = x1; i <= x2; i++) {
+            for (int j = y1; j <= y2; j++) {
+                if (i < world.getWidth() && i >= 0 && j < world.getHeight() && j >= 0 && getDistancePointToPoint(x, y, i, j) == 1) {
+                    if (trueMapOfPoints[i][j] > valueOfCell) {
+                        return new thePoint(i, j);
                     }
                 }
-                if (flag == false) {
-                    break;
-                }
             }
-        } while (flag);
+        }
+
         return null;
     }
 
