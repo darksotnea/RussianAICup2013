@@ -3614,7 +3614,7 @@ public final class MyStrategy implements Strategy {
 
         for (int i = x1; i <= x2; i++) {
             for (int j = y1; j <= y2; j++) {
-                if (i < world.getWidth() && i >= 0 && j < world.getHeight() && j >= 0 && getDistancePointToPoint(x, y, i, j) == 1) {
+                if (i < world.getWidth() && i >= 0 && j < world.getHeight() && j >= 0 && (int) getDistancePointToPoint(x, y, i, j) == 1) {
                     if (trueMapOfPoints[i][j] > valueOfCell) {
                         return new thePoint(i, j);
                     }
