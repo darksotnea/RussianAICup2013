@@ -9,7 +9,7 @@ public final class MyStrategy implements Strategy {
     private final int HP_WHEN_GO_MEDIC = 85;
     private final int AREA_OF_COMMANDER = 4;
     private final int AREA_OF_SOLDIER = 5;
-    private final int AREA_OF_SNIPER = 6;
+    private final int AREA_OF_SNIPER = 5;
     private final int AREA_OF_GRENADE = 5;
     private final int ACTION_POINT_OF_GRENADE_THROW = 8;
     private final int ACTION_POINT_OF_MEDIKIT_USE = 2;
@@ -874,30 +874,7 @@ public final class MyStrategy implements Strategy {
 
         if (self.getActionPoints() >= getCostMoveWithStance(self)) {
             if (targetX == globalTargetX && targetY == globalTargetY || targetX == localTargetX && targetY == localTargetY) {
-
-                //проверка на попадание в радиус командора, если выходишь, возврат обратно
-                if (indexOfSniper != -1 && self.getDistanceTo(troopers[indexOfSniper]) > AREA_OF_SNIPER && (indexOfScout != -1 || indexOfSoldier != -1 || indexOfCommander != -1)) {
-                    targetX = troopers[indexOfSniper].getX();
-                    targetY = troopers[indexOfSniper].getY();
-                }
-
-                //проверка на попадание в радиус солдата, если выходишь, возврат обратно
-                if (indexOfSoldier != -1 && self.getDistanceTo(troopers[indexOfSoldier]) > AREA_OF_SOLDIER) {
-                    targetX = troopers[indexOfSoldier].getX();
-                    targetY = troopers[indexOfSoldier].getY();
-                }
-
-                //проверка на попадание в радиус командора, если выходишь, возврат обратно
-                if (indexOfCommander != -1 && self.getDistanceTo(troopers[indexOfCommander]) > AREA_OF_COMMANDER) {
-                    targetX = troopers[indexOfCommander].getX();
-                    targetY = troopers[indexOfCommander].getY();
-                }
-
-                // если медик жив и мало хп, то бежим к медику
-                if (indexOfMedic != -1 && self.getHitpoints() < HP_WHEN_HEAL && self.getType() != TrooperType.FIELD_MEDIC) {
-                    targetX = troopers[indexOfMedic].getX();
-                    targetY = troopers[indexOfMedic].getY();
-                }
+                closeToTrooper(self, targetX, targetY);
             }
 
 
@@ -920,6 +897,45 @@ public final class MyStrategy implements Strategy {
             } else {
                 move.setAction(ActionType.END_TURN);
             }
+        }
+    }
+
+    boolean closeToTrooper(Trooper self, int targetX, int targetY) {
+
+        boolean changeGoal = false;
+
+        //проверка на попадание в радиус командора, если выходишь, возврат обратно
+        if (indexOfSniper != -1 && self.getDistanceTo(troopers[indexOfSniper]) > AREA_OF_SNIPER && (indexOfScout != -1 || indexOfSoldier != -1 || indexOfCommander != -1)) {
+            targetX = troopers[indexOfSniper].getX();
+            targetY = troopers[indexOfSniper].getY();
+            changeGoal = true;
+        }
+
+        //проверка на попадание в радиус солдата, если выходишь, возврат обратно
+        if (indexOfSoldier != -1 && self.getDistanceTo(troopers[indexOfSoldier]) > AREA_OF_SOLDIER) {
+            targetX = troopers[indexOfSoldier].getX();
+            targetY = troopers[indexOfSoldier].getY();
+            changeGoal = true;
+        }
+
+        //проверка на попадание в радиус командора, если выходишь, возврат обратно
+        if (indexOfCommander != -1 && self.getDistanceTo(troopers[indexOfCommander]) > AREA_OF_COMMANDER) {
+            targetX = troopers[indexOfCommander].getX();
+            targetY = troopers[indexOfCommander].getY();
+            changeGoal = true;
+        }
+
+        // если медик жив и мало хп, то бежим к медику
+        if (indexOfMedic != -1 && self.getHitpoints() < HP_WHEN_HEAL && self.getType() != TrooperType.FIELD_MEDIC) {
+            targetX = troopers[indexOfMedic].getX();
+            targetY = troopers[indexOfMedic].getY();
+            changeGoal = true;
+        }
+
+        if (changeGoal) {
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -1440,8 +1456,14 @@ public final class MyStrategy implements Strategy {
             if (bonuses != null) {
 
                 if (bonusTarget != null && self.getActionPoints() >= 4) { //TODO возможно поменять на 2
-                    if (goOnPath(self, bonusTarget.getX(), bonusTarget.getY(), true)) {
-                        return true;
+                    if (closeToTrooper(self, targetX, targetY)) {
+                        if (goOnPath(self, targetX, targetY, false)) {
+                            return true;
+                        }
+                    } else {
+                        if (goOnPath(self, bonusTarget.getX(), bonusTarget.getY(), true)) {
+                            return true;
+                        }
                     }
                 }
 
