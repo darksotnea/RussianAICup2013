@@ -1,6 +1,5 @@
 import model.*;
 
-import java.lang.annotation.Target;
 import java.util.*;
 
 import static java.lang.StrictMath.hypot;
@@ -16,7 +15,7 @@ public final class MyStrategy implements Strategy {
     private final int ACTION_POINT_OF_MEDIKIT_USE = 2;
     private final int ACTION_POINT_OF_FIELD_RATION_EAT = 2;
     private final int MIN_DISTANCE_FOR_LOCALTARGET = 1;
-    private final int TIME_EXPIRE_OF_LISTOFSOWENEMYS = 1;
+    private final int TIME_EXPIRE_OF_LISTOFSOWENEMYS = 2;
     private static boolean beginBattle = false;
     private static thePoint safePoint;
     private static boolean goToSafePlace = false;
@@ -4278,7 +4277,7 @@ public final class MyStrategy implements Strategy {
                     }
                 }
 
-                if (point != null) {        //TODO тестово, посмотреть как будет работать
+                if (point != null && self.getType() == TrooperType.SNIPER) {        //TODO тестово, посмотреть как будет работать
                     LinkedList<thePoint> tempPath = lee(self, self.getX(), self.getY(), point.getX(), point.getY(), true);
                     if (tempPath!= null && tempPath.size() > 1 && self.getActionPoints() - (tempPath.size() - 1) * 2 - 4 >= 0) {
                         if (goOnPath(self, target.getX(), target.getY(), true)) {
@@ -4334,7 +4333,7 @@ public final class MyStrategy implements Strategy {
                         }
                     }
                 } else {
-                    if (point != null) {
+                    if (point != null && self.getType() == TrooperType.SNIPER) {
                         LinkedList<thePoint> tempPath1 = lee(self, self.getX(), self.getY(), point.getX(), point.getY(), true);
                         if (tempPath1!= null && tempPath1.size() > 1 && self.getActionPoints() - (tempPath1.size() - 1) * 2 - 4 >= 0) {
                             if (goOnPath(self, target.getX(), target.getY(), true)) {
@@ -4349,7 +4348,7 @@ public final class MyStrategy implements Strategy {
 
             } else if(tempPath != null && tempPath.size() > 1 && (tempPath.size() - 1) * getCostMoveWithStance(self) <= self.getActionPoints()){
 
-                if (point != null) {
+                if (point != null && listOfEnemys.size() == 0) {
                     LinkedList<thePoint> tempPath1 = lee(self, self.getX(), self.getY(), point.getX(), point.getY(), true);
                     if (tempPath1!= null && tempPath1.size() > 1 && self.getActionPoints() - (tempPath1.size() - 1) * 2 - 4 >= 0) {
                         if (goOnPath(self, target.getX(), target.getY(), true)) {
