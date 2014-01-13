@@ -3685,9 +3685,9 @@ public final class MyStrategy implements Strategy {
 
                         int moves = 0;
                         for (int i = 0; i < tempList.size(); ++i) {
-                            if (getDistancePointToPoint(tempList.get(i).getX(), tempList.get(i).getY(), target.getX(), target.getY()) <= self.getShootingRange() && world.isVisible(self.getShootingRange(), tempList.get(i).getX(), tempList.get(i).getY(), self.getStance(), target.getX(), target.getY(), target.getStance())) {
+                            if (getDistancePointToPoint(tempList.get(i).getX(), tempList.get(i).getY(), target.getX(), target.getY()) <= self.getShootingRange() && world.isVisible(self.getShootingRange(), tempList.get(i).getX(), tempList.get(i).getY(), TrooperStance.STANDING, target.getX(), target.getY(), target.getStance())) {
                                 moves = i;
-                                if (target.getHitpoints() < ((leftScoreOfMove - moves * 2) / self.getShootCost()) * self.getDamage(self.getStance())) {
+                                if (target.getHitpoints() < ((leftScoreOfMove - moves * 2) / self.getShootCost()) * self.getStandingDamage()) {
                                     move.setAction(ActionType.MOVE);
                                     move.setX(tempList.get(1).getX());
                                     move.setY(tempList.get(1).getY());
