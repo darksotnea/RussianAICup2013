@@ -2633,106 +2633,107 @@ public final class MyStrategy implements Strategy {
                         }
                     }
                 } else {
+                    double len = 50;
+                    needHeal = false;
+
                     for (Trooper trooper : troopers) {
-                        needHeal = trooper.isTeammate() && trooper.getHitpoints() < HP_WHEN_HEAL;
+                        needHeal = trooper.isTeammate() && trooper.getHitpoints() < HP_WHEN_HEAL && self.getDistanceTo(trooper) < len;
                         if (needHeal) {
-                            if (targetHeal == null) {
-                                targetHeal = trooper;
-                            }
+                            len = self.getDistanceTo(trooper);
+                            targetHeal = trooper;
+                        }
+                    }
 
-                            Trooper trooper1 = null;
-                            if (self.getDistanceTo(trooper) <= 1) {
-                                if (targetHeal.getId() == self.getId() && targetTrooper != null && self.getHitpoints() < 76) {
-                                    boolean safePlace = true;
-                                    for (Trooper trooper2 : listOfEnemyTroopers) {
-                                        if (canSeeOrCanShoot(trooper2, self, false) || canSeeOrCanShoot(trooper2, self, true)) {
-                                            safePlace = false;
-                                            break;
-                                        }
-                                    }
-                                    if (safePlace) {
-                                        targetHeal = self;
-                                    } else {
-                                        thePoint tempPoint1 = findNotAchievableTail(self, true);
-                                        thePoint tempPoint2 = findNotAchievableTail(self, false);
-                                        thePoint tempPoint;
-
-                                        if (tempPoint1 != null && self.getX() == tempPoint1.getX() && self.getY() == tempPoint1.getY()) {
-                                            if(self.getActionPoints() >= game.getStanceChangeCost()) {
-                                                move.setAction(ActionType.LOWER_STANCE);
-                                                return true;
-                                            }
-                                        }
-
-                                        if (tempPoint1 == null) {
-                                            tempPoint = tempPoint2;
-                                            safePoint = tempPoint;
-                                        } else if (tempPoint2 == null) {
-                                            tempPoint = tempPoint1;
-                                            safePoint = tempPoint;
-                                        } else if (self.getDistanceTo(tempPoint1.getX(), tempPoint1.getY()) <= self.getDistanceTo(tempPoint2.getX(), tempPoint2.getY())) {
-                                            tempPoint = tempPoint2;
-                                            safePoint = tempPoint;
-                                        } else {
-                                            tempPoint = tempPoint1;
-                                            safePoint = tempPoint;
-                                        }
-
-                                        if (tempPoint != null) {
-                                            LinkedList<thePoint> tempPath1 = lee(self, self.getX(), self.getY(), tempPoint.getX(), tempPoint.getY(), true);
-                                            LinkedList<thePoint> tempPath2 = lee(self, self.getX(), self.getY(), tempPoint.getX(), tempPoint.getY(), false);
-                                            if (tempPath1 != null && tempPath1.size() > 1 && tempPath1.size() >= /*tempPath2.size() + 5*/self.getDistanceTo(tempPoint.getX(), tempPoint.getY()) + 7 && self.getActionPoints() >= (tempPath1.size() - 1) * getCostMoveWithStance(self)) {
-                                                if (goOnPath(self, tempPoint.getX(), tempPoint.getY(), true)) {
-                                                    return true;
-                                                }
-                                            } else if (tempPath2 != null && tempPath2.size() > 1 && self.getActionPoints() >= (tempPath2.size() - 1) * getCostMoveWithStance(self)) {
-                                                if (goOnPath(self, tempPoint.getX(), tempPoint.getY(), false)) {
-                                                    return true;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-
-                                if (targetTrooper != null && targetHeal.getHitpoints() > 75 && targetTrooper.getType() != TrooperType.SNIPER || targetTrooper != null && targetHeal.getHitpoints() > 95 && targetTrooper.getType() == TrooperType.SNIPER) {
-                                    if (targetTrooper != null && canShootOnTarget(self, targetTrooper)) {
-                                        shootOnTarget(self, targetTrooper);
-                                        return true;
-                                    }
-                                    for (Trooper trooper2 : listOfEnemyTroopers) {
-                                        if (canShootOnTarget(self, trooper2)) {
-                                            shootOnTarget(self, targetTrooper);
-                                            return true;
-                                        }
-                                    }
-                                }
-
-                                heal(self, trooper);
-                                return true;
-                            } else {
-                                boolean canMove = true;
-                                for (Trooper troop : troopers) {
-                                    LinkedList<thePoint> tempPath = lee(self, self.getX(), self.getY(), troop.getX(), troop.getY(), true);
-                                    if (!troop.isTeammate() && self.getDistanceTo(troop) <= self.getVisionRange() && tempPath != null && tempPath.size() > 1 && tempPath.size() - 1 >= self.getDistanceTo(troop) + 5) {
-                                        canMove = false;
-                                        trooper1 = troop;
+                    if (needHeal) {
+                        Trooper trooper1 = null;
+                        if (self.getDistanceTo(targetHeal) <= 1) {
+                            if (targetHeal.getId() == self.getId() && targetTrooper != null && self.getHitpoints() < 76) {
+                                boolean safePlace = true;
+                                for (Trooper trooper2 : listOfEnemyTroopers) {
+                                    if (canSeeOrCanShoot(trooper2, self, false) || canSeeOrCanShoot(trooper2, self, true)) {
+                                        safePlace = false;
                                         break;
                                     }
                                 }
-                                if (self.getActionPoints() >= getCostMoveWithStance(self) && !isDistanceEqualOrLessOneTail(self, trooper) && canMove) {
-                                    LinkedList<thePoint> path1 = lee(self, self.getX(), self.getY(), targetHeal.getX(), targetHeal.getY(), true);
-                                    LinkedList<thePoint> path2 = lee(self, self.getX(), self.getY(), targetHeal.getX(), targetHeal.getY(), false);
+                                if (safePlace) {
+                                    targetHeal = self;
+                                } else {
+                                    thePoint tempPoint1 = findNotAchievableTail(self, true);
+                                    thePoint tempPoint2 = findNotAchievableTail(self, false);
+                                    thePoint tempPoint;
 
-                                    if (path1 != null && path1.size() <= path2.size() + 5) {
-                                        if (goOnPath(self, trooper.getX(), trooper.getY(), true)) {
+                                    if (tempPoint1 != null && self.getX() == tempPoint1.getX() && self.getY() == tempPoint1.getY()) {
+                                        if (self.getActionPoints() >= game.getStanceChangeCost()) {
+                                            move.setAction(ActionType.LOWER_STANCE);
                                             return true;
                                         }
-                                    }/* else if (trooper1 != null) {
-                                        goOnWar(self, trooper1.getX(), trooper1.getY());
-                                        return true;
-                                    }*/ else if (goOnPath(self, trooper.getX(), trooper.getY(), false)) {
+                                    }
+
+                                    if (tempPoint1 == null) {
+                                        tempPoint = tempPoint2;
+                                        safePoint = tempPoint;
+                                    } else if (tempPoint2 == null) {
+                                        tempPoint = tempPoint1;
+                                        safePoint = tempPoint;
+                                    } else if (self.getDistanceTo(tempPoint1.getX(), tempPoint1.getY()) <= self.getDistanceTo(tempPoint2.getX(), tempPoint2.getY())) {
+                                        tempPoint = tempPoint2;
+                                        safePoint = tempPoint;
+                                    } else {
+                                        tempPoint = tempPoint1;
+                                        safePoint = tempPoint;
+                                    }
+
+                                    if (tempPoint != null) {
+                                        LinkedList<thePoint> tempPath1 = lee(self, self.getX(), self.getY(), tempPoint.getX(), tempPoint.getY(), true);
+                                        LinkedList<thePoint> tempPath2 = lee(self, self.getX(), self.getY(), tempPoint.getX(), tempPoint.getY(), false);
+                                        if (tempPath1 != null && tempPath1.size() > 1 && tempPath1.size() >= /*tempPath2.size() + 5*/self.getDistanceTo(tempPoint.getX(), tempPoint.getY()) + 7 && self.getActionPoints() >= (tempPath1.size() - 1) * getCostMoveWithStance(self)) {
+                                            if (goOnPath(self, tempPoint.getX(), tempPoint.getY(), true)) {
+                                                return true;
+                                            }
+                                        } else if (tempPath2 != null && tempPath2.size() > 1 && self.getActionPoints() >= (tempPath2.size() - 1) * getCostMoveWithStance(self)) {
+                                            if (goOnPath(self, tempPoint.getX(), tempPoint.getY(), false)) {
+                                                return true;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (targetTrooper != null && targetHeal.getHitpoints() > 75 && targetTrooper.getType() != TrooperType.SNIPER || targetTrooper != null && targetHeal.getHitpoints() > 95 && targetTrooper.getType() == TrooperType.SNIPER) {
+                                if (targetTrooper != null && canShootOnTarget(self, targetTrooper)) {
+                                    shootOnTarget(self, targetTrooper);
+                                    return true;
+                                }
+                                for (Trooper trooper2 : listOfEnemyTroopers) {
+                                    if (canShootOnTarget(self, trooper2)) {
+                                        shootOnTarget(self, targetTrooper);
                                         return true;
                                     }
+                                }
+                            }
+
+                            heal(self, targetHeal);
+                            return true;
+                        } else {
+                            boolean canMove = true;
+                            for (Trooper troop : troopers) {
+                                LinkedList<thePoint> tempPath = lee(self, self.getX(), self.getY(), troop.getX(), troop.getY(), true);
+                                if (!troop.isTeammate() && self.getDistanceTo(troop) <= self.getVisionRange() && tempPath != null && tempPath.size() > 1 && tempPath.size() - 1 >= self.getDistanceTo(troop) + 5) {
+                                    canMove = false;
+                                    trooper1 = troop;
+                                    break;
+                                }
+                            }
+                            if (self.getActionPoints() >= getCostMoveWithStance(self) && !isDistanceEqualOrLessOneTail(self, targetHeal) && canMove) {
+                                LinkedList<thePoint> path1 = lee(self, self.getX(), self.getY(), targetHeal.getX(), targetHeal.getY(), true);
+                                LinkedList<thePoint> path2 = lee(self, self.getX(), self.getY(), targetHeal.getX(), targetHeal.getY(), false);
+
+                                if (path1 != null && path1.size() <= path2.size() + 5) {
+                                    if (goOnPath(self, targetHeal.getX(), targetHeal.getY(), true)) {
+                                        return true;
+                                    }
+                                } else if (goOnPath(self, targetHeal.getX(), targetHeal.getY(), false)) {
+                                    return true;
                                 }
                             }
                         }
