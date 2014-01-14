@@ -101,72 +101,6 @@ public final class MyStrategy implements Strategy {
         troopers = world.getTroopers();
         bonuses = world.getBonuses();
 
-        if (lastTrooperType != self.getType()) {
-
-            complatedPathOfTrooper = new LinkedList<>();
-
-            safePoint = null;
-            safeStance = null;
-            goToSafePlace = false;
-            saveMoveSafePlace = -1;
-
-            savedTrooperId = -1;
-            idOfTrooperStop = -1;
-
-            bonusTarget = null;
-            goToBonus = false;
-
-            if(indexOfMedic == -1) {
-                targetHeal = null;
-            }
-        }
-
-        lastTrooperType = self.getType();
-
-        //строим карту с приоритетом ячеек
-        trueMapOfPoints = getMapOfPoints(self);
-
-        if (targetTrooper == null) {
-            beginBattle = false;
-        }
-
-        if (detectEnemyByTeam == true && targetTrooper == null && localTargetX == 100) {
-            detectEnemyByTeam = false;
-        }
-
-        if (!(saveMoveWorld == world.getMoveIndex() || saveMoveWorld == world.getMoveIndex() - 1)) {
-            istroopersUnderAttack = false;
-        }
-
-        if (goToSafePlace) {
-            saveMoveSafePlace = world.getMoveIndex();
-            savedTrooperId = (int) self.getId();
-        } else if (saveMoveSafePlace == world.getMoveIndex() && savedTrooperId == self.getId()){
-            move.setAction(ActionType.END_TURN);
-            return;
-        }
-
-        if (safeStance != null /*&& safePoint != null && safePoint.getX() == self.getX() && safePoint.getY() == self.getY()*/ && safeStance == self.getStance() && saveMoveSafePlace == world.getMoveIndex()) {
-            if (targetTrooper != null && canShootOnTarget(self, targetTrooper)) {
-                shootOnTarget(self, targetTrooper);
-                return;
-            }
-            if (listOfEnemyTroopers.size() != 0) {
-                for (Trooper trooper : listOfEnemyTroopers) {
-                    if (canShootOnTarget(self, trooper)) {
-                        shootOnTarget(self, trooper);
-                        return;
-                    }
-                }
-            }
-            if (targetHeal != null && self.getDistanceTo(targetHeal) <= 1) {
-                heal(self, targetHeal);
-                return;
-            }
-            move.setAction(ActionType.END_TURN);
-            return;
-        }
-
         //получение списка врагов и обновление параметров юнитов, таких как индексы в массиве troopers и их ХП.
         listOfEnemys = new LinkedList<>();
         teamCount = 0;
@@ -218,6 +152,106 @@ public final class MyStrategy implements Strategy {
                 teamCount++;
                 forwardTrooper = indexOfScout;
             }
+        }
+
+        if (lastTrooperType != self.getType() && teamCount > 1) {
+
+            complatedPathOfTrooper = new LinkedList<>();
+
+            safePoint = null;
+            safeStance = null;
+            goToSafePlace = false;
+            saveMoveSafePlace = -1;
+
+            savedTrooperId = -1;
+            idOfTrooperStop = -1;
+
+            forwardTrooper = -1;
+
+            bonusTarget = null;
+            goToBonus = false;
+
+            if(indexOfMedic == -1) {
+                targetHeal = null;
+            }
+
+            for (Trooper trooper : troopers) {
+                boolean flag = false;
+                if (lastTrooperType == trooper.getType() && trooper.isTeammate()) {
+                    for (int i = 0; i < hpOfTroopers.length; i++) {
+                        if (trooper.getId() == hpOfTroopers[i][0]) {
+                            if (world.getMoveIndex() == stayOnTailList.get(i).worldMove) {
+
+                                if (stayOnTailList.get(i).getX() == trooper.getX() && stayOnTailList.get(i).getY() == trooper.getY()) {
+
+                                    stayOnTailList.get(i).indexOfTailTime++;
+                                    flag = true;
+                                    break;
+
+                                } else {
+                                    stayOnTailList.set(i, new thePoint(trooper.getX(), trooper.getY()));
+                                    flag = true;
+                                    break;
+                                }
+
+                            } else if (world.getMoveIndex() != stayOnTailList.get(i).worldMove) {
+                                flag = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (flag) {
+                    break;
+                }
+            }
+
+        }
+
+        lastTrooperType = self.getType();
+
+        //строим карту с приоритетом ячеек
+        trueMapOfPoints = getMapOfPoints(self);
+
+        if (targetTrooper == null) {
+            beginBattle = false;
+        }
+
+        if (detectEnemyByTeam == true && targetTrooper == null && localTargetX == 100) {
+            detectEnemyByTeam = false;
+        }
+
+        if (!(saveMoveWorld == world.getMoveIndex() || saveMoveWorld == world.getMoveIndex() - 1)) {
+            istroopersUnderAttack = false;
+        }
+
+        if (goToSafePlace) {
+            saveMoveSafePlace = world.getMoveIndex();
+            savedTrooperId = (int) self.getId();
+        } else if (saveMoveSafePlace == world.getMoveIndex() && savedTrooperId == self.getId()){
+            move.setAction(ActionType.END_TURN);
+            return;
+        }
+
+        if (safeStance != null /*&& safePoint != null && safePoint.getX() == self.getX() && safePoint.getY() == self.getY()*/ && safeStance == self.getStance() && saveMoveSafePlace == world.getMoveIndex()) {
+            if (targetTrooper != null && canShootOnTarget(self, targetTrooper)) {
+                shootOnTarget(self, targetTrooper);
+                return;
+            }
+            if (listOfEnemyTroopers.size() != 0) {
+                for (Trooper trooper : listOfEnemyTroopers) {
+                    if (canShootOnTarget(self, trooper)) {
+                        shootOnTarget(self, trooper);
+                        return;
+                    }
+                }
+            }
+            if (targetHeal != null && self.getDistanceTo(targetHeal) <= 1) {
+                heal(self, targetHeal);
+                return;
+            }
+            move.setAction(ActionType.END_TURN);
+            return;
         }
 
         if (isUseLastMove && listOfEnemys.size() == 0) {
@@ -447,25 +481,36 @@ public final class MyStrategy implements Strategy {
         //если долго стоим на месте, то значит тупиковая ситуация, выходим из неё при помощи conductTheWar
         for (Trooper trooper : troopers) {
             boolean flag = false;
-            if (self.getType() == trooper.getType()) {
+            if (self.getType() == trooper.getType() && trooper.isTeammate()) {
                 for (int i = 0; i < hpOfTroopers.length; i++) {
                     if (trooper.getId() == hpOfTroopers[i][0]) {
                         if (world.getMoveIndex() == stayOnTailList.get(i).worldMove) {
 
                             if (stayOnTailList.get(i).getX() == self.getX() && stayOnTailList.get(i).getY() == self.getY()) {
 
-                                stayOnTailList.get(i).indexOfTailTime++;
-                                stayOnTailList.get(i).worldMove++;
+                                if (stayOnTailList.get(i).indexOfTailTime >= 5) {
 
-                                if (stayOnTailList.get(i).indexOfTailTime > 5) {
-                                    if (conductTheWar(self)) {
-                                        return;
+                                    int myTempScore = -1;
+                                    for (Player player : world.getPlayers()) {
+                                        if (player.getName().equalsIgnoreCase("darkstone")) {
+                                            myTempScore = player.getScore();
+                                        }
+                                    }
+
+                                    for (Player player : world.getPlayers()) {
+                                        if (!player.getName().equalsIgnoreCase("darkstone")) {
+                                            if (myTempScore < player.getScore()) {
+                                                if (conductTheWar(self)) {
+                                                    return;
+                                                }
+                                            }
+                                        }
                                     }
                                 }
+                                stayOnTailList.get(i).worldMove++;
                                 flag = true;
                                 break;
                             } else {
-                                stayOnTailList.set(i, new thePoint(self.getX(), self.getY()));
                                 flag = true;
                                 break;
                             }
@@ -2649,7 +2694,7 @@ public final class MyStrategy implements Strategy {
                                     }
                                 }
 
-                                if (targetHeal.getHitpoints() > 75 && targetTrooper.getType() != TrooperType.SNIPER || targetHeal.getHitpoints() > 95 && targetTrooper.getType() == TrooperType.SNIPER) {
+                                if (targetTrooper != null && targetHeal.getHitpoints() > 75 && targetTrooper.getType() != TrooperType.SNIPER || targetTrooper != null && targetHeal.getHitpoints() > 95 && targetTrooper.getType() == TrooperType.SNIPER) {
                                     if (targetTrooper != null && canShootOnTarget(self, targetTrooper)) {
                                         shootOnTarget(self, targetTrooper);
                                         return true;
