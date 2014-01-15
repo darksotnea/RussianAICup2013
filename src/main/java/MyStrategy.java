@@ -1122,7 +1122,7 @@ public final class MyStrategy implements Strategy {
                     LinkedList<thePoint> tempPath2 = lee(self, self.getX(), self.getY(), targetX, targetY, false);
                     double dist = self.getDistanceTo(targetX, targetY);
 
-                    if (tempPath1 != null && tempPath1.size() > 1 && tempPath2 != null && tempPath2.size() > 1 && tempPath1.size() > tempPath2.size() + 5 && tempPath1.size() > dist + 4) {
+                    if (tempPath1 != null && tempPath1.size() > 1 && tempPath2 != null && tempPath2.size() > 1 && tempPath1.size() < tempPath2.size() + 5 && tempPath1.size() > dist + 4) {
                         thePoint point = findCloseCell(self, targetX, targetY, true);
                         if (point != null && goOnPath(self, point.getX(), point.getY(), false)) {
                             return true;
@@ -4593,7 +4593,6 @@ public final class MyStrategy implements Strategy {
         int H = world.getHeight();
         int BLANK = -2;
         double dist = 6;
-        boolean flag = true;
         int goUpStance = 0;
 
         if (self.getStance() == TrooperStance.PRONE) {
@@ -4608,8 +4607,30 @@ public final class MyStrategy implements Strategy {
         for (int i = 0; i < W; i++) {
             cellsIntTemp[i] = Arrays.copyOf(cellsInt[i], cellsInt[i].length);
         }
+        LinkedList<thePoint> tempPath1 = lee(self, self.getX(), self.getY(), targetX, targetY, true);
+        if (tempPath1 != null && tempPath1.size() > 1) {
+            for (int i = tempPath1.size() - 1; i >= 0; i--) {
+                if (cellsIntTemp[tempPath1.get(i).getX()][tempPath1.get(i).getY()] == BLANK && getDistancePointToPoint(tempPath1.get(i).getX(), tempPath1.get(i).getY(), targetX, targetY) <= dist) {
+                    LinkedList<thePoint> tempPath = lee(self, self.getX(), self.getY(), tempPath1.get(i).getX(), tempPath1.get(i).getY(), isWithTroopers);
+                    if (tempPath != null && tempPath.size() > 1 && self.getActionPoints() >= (tempPath.size() - 1) * game.getStandingMoveCost() + goUpStance) {
+                        for (Trooper trooper : troopers) {
+                            if (trooper.getX() == tempPath1.get(i).getX() && trooper.getY() == tempPath1.get(i).getY()) {
+                                tempPath = null;
+                                break;
+                            }
+                        }
 
-        for (int i = 0; i < W; i++) {
+                        if (tempPath != null && tempPath.size() > 1) {
+                            x1 = tempPath1.get(i).getX();
+                            y1 = tempPath1.get(i).getY();
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        /*for (int i = 0; i < W; i++) {
             for (int j = 0; j < H; j++) {
                 if (cellsIntTemp[i][j] == BLANK && getDistancePointToPoint(i, j, targetX, targetY) <= dist) {
                     LinkedList<thePoint> tempPath = lee(self, self.getX(), self.getY(), i, j, isWithTroopers);
@@ -4624,14 +4645,14 @@ public final class MyStrategy implements Strategy {
                         if (tempPath != null && tempPath.size() > 1) {
                             x1 = i;
                             y1 = j;
-                            flag = false;
+                            flag = true;
                         }
                     }
                 }
                 if (flag) { break;}
             }
             if (flag) { break;}
-        }
+        }*/
 
         if (x1 != -1 && y1 != -1) {
             return new thePoint(x1, y1);
@@ -4935,69 +4956,9 @@ public final class MyStrategy implements Strategy {
 
         if (indexOfScout != -1) {
             tempTrooper = troopers[indexOfScout];
-            path2 = lee(tempTrooper, tempTrooper.getX(), tempTrooper.getY(), targetX, targetY, false);
-
-            if (testOnTrueMap(self, path1)) {
-                return true;
-            }
-
-            if (path1 != null && path2 != null && path2.size() - path1.size() >= 0) {
-
-                if (trueMapOfPoints[lastMoveX][lastMoveY] > 4) { //TODO возможно нужно поставить >=
-
-                    if (!isUseLastMove && goOnPath(self, lastMoveX, lastMoveY, true)) {
-                        isUseLastMove = true;
-                        return true;
-                    } else {
-                        isUseLastMove = false;
-                        move.setAction(ActionType.END_TURN);
-                        return true;
-                    }
-
-                } else {
-
-                    if (trueMapOfPoints[self.getX()][self.getY()] > 4) {
-                        move.setAction(ActionType.END_TURN);
-                        return true;
-                    } else {
-                        for (int i = self.getX() - 1; i <= self.getX() + 1; i++) {
-                            for (int j = self.getY() - 1; j <= self.getY() + 1; j++) {
-                                if (self.getDistanceTo(i, j) <= 1 && trueMapOfPoints[i][j] > trueMapOfPoints[self.getX()][self.getY()]) {
-                                    if (goOnPath(self, i, j, true)) {
-                                        return true;
-                                    }
-                                }
-                            }
-                        }
-                        for (int i = self.getX() - 1; i <= self.getX() + 1; i++) {
-                            for (int j = self.getY() - 1; j <= self.getY() + 1; j++) {
-                                if (self.getDistanceTo(i, j) <= 1 && trueMapOfPoints[i][j] >= trueMapOfPoints[self.getX()][self.getY()]) {
-                                    if (goOnPath(self, i, j, true)) {
-                                        return true;
-                                    }
-                                }
-                            }
-                        }
-
-                        move.setAction(ActionType.END_TURN);
-                        return true;
-                    }
-
-                }
-
-            } else if (isUseLastMove) {
-
-                isUseLastMove = false;
-                move.setAction(ActionType.END_TURN);
-                return true;
-
-            }
-
-        } else if (self.getType() != TrooperType.COMMANDER) {
-
-            if (indexOfCommander != -1) {
-
-                tempTrooper = troopers[indexOfCommander];
+            path2 = lee(self, self.getX(), self.getY(), tempTrooper.getX(), tempTrooper.getY(), false);
+            if(path2 != null && path2.size() > 1 && path2.size() <= 5) {
+                path2 = null;
                 path2 = lee(tempTrooper, tempTrooper.getX(), tempTrooper.getY(), targetX, targetY, false);
 
                 if (testOnTrueMap(self, path1)) {
@@ -5006,35 +4967,7 @@ public final class MyStrategy implements Strategy {
 
                 if (path1 != null && path2 != null && path2.size() - path1.size() >= 0) {
 
-                    if (!isUseLastMove && goOnPath(self, lastMoveX, lastMoveY, true)) {
-                        isUseLastMove = true;
-                        return true;
-                    } else {
-                        isUseLastMove = false;
-                        move.setAction(ActionType.END_TURN);
-                        return true;
-                    }
-
-                } else if (isUseLastMove) {
-
-                    isUseLastMove = false;
-                    move.setAction(ActionType.END_TURN);
-                    return true;
-
-                }
-
-            } else if (self.getType() != TrooperType.SOLDIER) {
-
-                if (indexOfSoldier != -1) {
-
-                    tempTrooper = troopers[indexOfSoldier];
-                    path2 = lee(tempTrooper, tempTrooper.getX(), tempTrooper.getY(), targetX, targetY, false);
-
-                    if (testOnTrueMap(self, path1)) {
-                        return true;
-                    }
-
-                    if (path1 != null && path2 != null && path2.size() - path1.size() >= 0) {
+                    if (trueMapOfPoints[lastMoveX][lastMoveY] > 4) {
 
                         if (!isUseLastMove && goOnPath(self, lastMoveX, lastMoveY, true)) {
                             isUseLastMove = true;
@@ -5045,26 +4978,63 @@ public final class MyStrategy implements Strategy {
                             return true;
                         }
 
-                    } else if (isUseLastMove) {
+                    } else {
 
-                        isUseLastMove = false;
-                        move.setAction(ActionType.END_TURN);
-                        return true;
+                        if (trueMapOfPoints[self.getX()][self.getY()] > 4) {
+                            move.setAction(ActionType.END_TURN);
+                            return true;
+                        } else {
+                            for (int i = self.getX() - 1; i <= self.getX() + 1; i++) {
+                                for (int j = self.getY() - 1; j <= self.getY() + 1; j++) {
+                                    if (self.getDistanceTo(i, j) <= 1 && trueMapOfPoints[i][j] > trueMapOfPoints[self.getX()][self.getY()]) {
+                                        if (goOnPath(self, i, j, true)) {
+                                            return true;
+                                        }
+                                    }
+                                }
+                            }
+                            for (int i = self.getX() - 1; i <= self.getX() + 1; i++) {
+                                for (int j = self.getY() - 1; j <= self.getY() + 1; j++) {
+                                    if (self.getDistanceTo(i, j) <= 1 && trueMapOfPoints[i][j] >= trueMapOfPoints[self.getX()][self.getY()]) {
+                                        if (goOnPath(self, i, j, true)) {
+                                            return true;
+                                        }
+                                    }
+                                }
+                            }
 
-                    }
-
-                } else if (self.getType() != TrooperType.FIELD_MEDIC) {
-
-                    if (indexOfMedic != -1) {
-
-                        tempTrooper = troopers[indexOfMedic];
-                        path2 = lee(tempTrooper, tempTrooper.getX(), tempTrooper.getY(), targetX, targetY, false);
-
-                        if (testOnTrueMap(self, path1)) {
+                            move.setAction(ActionType.END_TURN);
                             return true;
                         }
 
-                        if (path1 != null && path2 != null && path2.size() - path1.size() >= 0) {
+                    }
+
+                } else if (isUseLastMove) {
+
+                    isUseLastMove = false;
+                    move.setAction(ActionType.END_TURN);
+                    return true;
+
+                }
+            }
+
+        } else if (self.getType() != TrooperType.COMMANDER) {
+
+            if (indexOfCommander != -1) {
+
+                tempTrooper = troopers[indexOfCommander];
+                path2 = lee(self, self.getX(), self.getY(), tempTrooper.getX(), tempTrooper.getY(), false);
+                if(path2 != null && path2.size() > 1 && path2.size() <= 5) {
+                    path2 = null;
+                    path2 = lee(tempTrooper, tempTrooper.getX(), tempTrooper.getY(), targetX, targetY, false);
+
+                    if (testOnTrueMap(self, path1)) {
+                        return true;
+                    }
+
+                    if (path1 != null && path2 != null && path2.size() - path1.size() >= 0) {
+
+                        if (trueMapOfPoints[lastMoveX][lastMoveY] > 4) {
 
                             if (!isUseLastMove && goOnPath(self, lastMoveX, lastMoveY, true)) {
                                 isUseLastMove = true;
@@ -5075,12 +5045,178 @@ public final class MyStrategy implements Strategy {
                                 return true;
                             }
 
+                        } else {
+
+                            if (trueMapOfPoints[self.getX()][self.getY()] > 4) {
+                                move.setAction(ActionType.END_TURN);
+                                return true;
+                            } else {
+                                for (int i = self.getX() - 1; i <= self.getX() + 1; i++) {
+                                    for (int j = self.getY() - 1; j <= self.getY() + 1; j++) {
+                                        if (self.getDistanceTo(i, j) <= 1 && trueMapOfPoints[i][j] > trueMapOfPoints[self.getX()][self.getY()]) {
+                                            if (goOnPath(self, i, j, true)) {
+                                                return true;
+                                            }
+                                        }
+                                    }
+                                }
+                                for (int i = self.getX() - 1; i <= self.getX() + 1; i++) {
+                                    for (int j = self.getY() - 1; j <= self.getY() + 1; j++) {
+                                        if (self.getDistanceTo(i, j) <= 1 && trueMapOfPoints[i][j] >= trueMapOfPoints[self.getX()][self.getY()]) {
+                                            if (goOnPath(self, i, j, true)) {
+                                                return true;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                move.setAction(ActionType.END_TURN);
+                                return true;
+                            }
+
+                        }
+
+                    } else if (isUseLastMove) {
+
+                        isUseLastMove = false;
+                        move.setAction(ActionType.END_TURN);
+                        return true;
+
+                    }
+                }
+
+            } else if (self.getType() != TrooperType.SOLDIER) {
+
+                if (indexOfSoldier != -1) {
+
+                    tempTrooper = troopers[indexOfSoldier];
+                    path2 = lee(self, self.getX(), self.getY(), tempTrooper.getX(), tempTrooper.getY(), false);
+                    if(path2 != null && path2.size() > 1 && path2.size() <= 5) {
+                        path2 = null;
+                        path2 = lee(tempTrooper, tempTrooper.getX(), tempTrooper.getY(), targetX, targetY, false);
+
+                        if (testOnTrueMap(self, path1)) {
+                            return true;
+                        }
+
+                        if (path1 != null && path2 != null && path2.size() - path1.size() >= 0) {
+
+                            if (trueMapOfPoints[lastMoveX][lastMoveY] > 4) {
+
+                                if (!isUseLastMove && goOnPath(self, lastMoveX, lastMoveY, true)) {
+                                    isUseLastMove = true;
+                                    return true;
+                                } else {
+                                    isUseLastMove = false;
+                                    move.setAction(ActionType.END_TURN);
+                                    return true;
+                                }
+
+                            } else {
+
+                                if (trueMapOfPoints[self.getX()][self.getY()] > 4) {
+                                    move.setAction(ActionType.END_TURN);
+                                    return true;
+                                } else {
+                                    for (int i = self.getX() - 1; i <= self.getX() + 1; i++) {
+                                        for (int j = self.getY() - 1; j <= self.getY() + 1; j++) {
+                                            if (self.getDistanceTo(i, j) <= 1 && trueMapOfPoints[i][j] > trueMapOfPoints[self.getX()][self.getY()]) {
+                                                if (goOnPath(self, i, j, true)) {
+                                                    return true;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    for (int i = self.getX() - 1; i <= self.getX() + 1; i++) {
+                                        for (int j = self.getY() - 1; j <= self.getY() + 1; j++) {
+                                            if (self.getDistanceTo(i, j) <= 1 && trueMapOfPoints[i][j] >= trueMapOfPoints[self.getX()][self.getY()]) {
+                                                if (goOnPath(self, i, j, true)) {
+                                                    return true;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    move.setAction(ActionType.END_TURN);
+                                    return true;
+                                }
+
+                            }
+
                         } else if (isUseLastMove) {
 
                             isUseLastMove = false;
                             move.setAction(ActionType.END_TURN);
                             return true;
 
+                        }
+                    }
+
+                } else if (self.getType() != TrooperType.FIELD_MEDIC) {
+
+                    if (indexOfMedic != -1) {
+
+                        tempTrooper = troopers[indexOfMedic];
+                        path2 = lee(self, self.getX(), self.getY(), tempTrooper.getX(), tempTrooper.getY(), false);
+                        if(path2 != null && path2.size() > 1 && path2.size() <= 5) {
+                            path2 = null;
+                            path2 = lee(tempTrooper, tempTrooper.getX(), tempTrooper.getY(), targetX, targetY, false);
+
+                            if (testOnTrueMap(self, path1)) {
+                                return true;
+                            }
+
+                            if (path1 != null && path2 != null && path2.size() - path1.size() >= 0) {
+
+                                if (trueMapOfPoints[lastMoveX][lastMoveY] > 4) {
+
+                                    if (!isUseLastMove && goOnPath(self, lastMoveX, lastMoveY, true)) {
+                                        isUseLastMove = true;
+                                        return true;
+                                    } else {
+                                        isUseLastMove = false;
+                                        move.setAction(ActionType.END_TURN);
+                                        return true;
+                                    }
+
+                                } else {
+
+                                    if (trueMapOfPoints[self.getX()][self.getY()] > 4) {
+                                        move.setAction(ActionType.END_TURN);
+                                        return true;
+                                    } else {
+                                        for (int i = self.getX() - 1; i <= self.getX() + 1; i++) {
+                                            for (int j = self.getY() - 1; j <= self.getY() + 1; j++) {
+                                                if (self.getDistanceTo(i, j) <= 1 && trueMapOfPoints[i][j] > trueMapOfPoints[self.getX()][self.getY()]) {
+                                                    if (goOnPath(self, i, j, true)) {
+                                                        return true;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        for (int i = self.getX() - 1; i <= self.getX() + 1; i++) {
+                                            for (int j = self.getY() - 1; j <= self.getY() + 1; j++) {
+                                                if (self.getDistanceTo(i, j) <= 1 && trueMapOfPoints[i][j] >= trueMapOfPoints[self.getX()][self.getY()]) {
+                                                    if (goOnPath(self, i, j, true)) {
+                                                        return true;
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        move.setAction(ActionType.END_TURN);
+                                        return true;
+                                    }
+
+                                }
+
+                            } else if (isUseLastMove) {
+
+                                isUseLastMove = false;
+                                move.setAction(ActionType.END_TURN);
+                                return true;
+
+                            }
                         }
                     }
                 }
