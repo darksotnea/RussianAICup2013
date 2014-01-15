@@ -1117,7 +1117,7 @@ public final class MyStrategy implements Strategy {
                     return true;
                 }
 
-                if (listOfEnemyTroopers.size() == 0 && !(targetX == localTargetX && targetY == localTargetY || targetX == globalTargetX && targetY == globalTargetY)) {
+                if (listOfEnemyTroopers.size() == 0 && !(targetX == localTargetX && targetY == localTargetY || targetX == globalTargetX && targetY == globalTargetY) && !goToBonus) {
                     LinkedList<thePoint> tempPath1 = lee(self, self.getX(), self.getY(), targetX, targetY, true);
                     LinkedList<thePoint> tempPath2 = lee(self, self.getX(), self.getY(), targetX, targetY, false);
                     double dist = self.getDistanceTo(targetX, targetY);
@@ -1654,17 +1654,13 @@ public final class MyStrategy implements Strategy {
             }
 
             if (targetTrooper == null && self.getActionPoints() >= getCostMoveWithStance(self) * 3 && self.getType() == TrooperType.SNIPER && !goToSafePlace && targetHeal == null && (targetX == localTargetX && targetY == localTargetY || targetX == globalTargetX && targetY == globalTargetY)) {
-                if(targetX == localTargetX && targetY == localTargetY || targetX == globalTargetX && targetY == globalTargetY) {
-                    if (followAfterTrooper(self, targetX, targetY)) {
-                        return true;
-                    }
+                if (followAfterTrooper(self, targetX, targetY)) {
+                    return true;
                 }
             }
             if (targetTrooper == null &&  self.getActionPoints() >= getCostMoveWithStance(self) * 3 && self.getType() == TrooperType.FIELD_MEDIC && !goToSafePlace && targetHeal == null && (targetX == localTargetX && targetY == localTargetY || targetX == globalTargetX && targetY == globalTargetY)) {
-                if(targetX == localTargetX && targetY == localTargetY || targetX == globalTargetX && targetY == globalTargetY) {
-                    if (followAfterTrooper(self, targetX, targetY)) {
-                        return true;
-                    }
+                if (followAfterTrooper(self, targetX, targetY)) {
+                    return true;
                 }
             }
             if (targetTrooper == null &&  self.getActionPoints() >= getCostMoveWithStance(self) * 3 && self.getType() == TrooperType.SOLDIER && !goToSafePlace && targetHeal == null && (targetX == localTargetX && targetY == localTargetY || targetX == globalTargetX && targetY == globalTargetY)) {
@@ -1729,13 +1725,13 @@ public final class MyStrategy implements Strategy {
             }
 
             if (trueMapOfPoints[self.getX()][self.getY()] == 2 && self.getActionPoints() >= getCostMoveWithStance(self)) {
-                thePoint tempPoint = findStrongCell(self.getX(), self.getY(), 4);
+                thePoint tempPoint = findStrongCell(self, self.getX(), self.getY(), 4);
                 if (tempPoint != null) {
                     if (goOnPath(self, tempPoint.getX(), tempPoint.getY(), true)) {
                         return true;
                     }
                 } else {
-                    tempPoint = findStrongCell(self.getX(), self.getY(), 2);
+                    tempPoint = findStrongCell(self, self.getX(), self.getY(), 2);
                     if (tempPoint != null) {
                         if (goOnPath(self, tempPoint.getX(), tempPoint.getY(), true)) {
                             return true;
@@ -1747,7 +1743,7 @@ public final class MyStrategy implements Strategy {
             }
 
             if (trueMapOfPoints[self.getX()][self.getY()] == 4 && self.getActionPoints() >= getCostMoveWithStance(self)) {
-                thePoint tempPoint = findStrongCell(self.getX(), self.getY(), 4);
+                thePoint tempPoint = findStrongCell(self, self.getX(), self.getY(), 4);
                 if (tempPoint != null) {
                     if (goOnPath(self, tempPoint.getX(), tempPoint.getY(), true)) {
                         return true;
@@ -3864,7 +3860,7 @@ public final class MyStrategy implements Strategy {
         return null;
     }
 
-    thePoint findStrongCell(int x, int y, int valueOfCell) {
+    thePoint findStrongCell(Trooper self, int x, int y, int valueOfCell) {
         int x1 = x - 1;
         int y1 = y - 1;
         int x2 = x + 1;
@@ -3872,7 +3868,7 @@ public final class MyStrategy implements Strategy {
 
         for (int i = x1; i <= x2; i++) {
             for (int j = y1; j <= y2; j++) {
-                if (i < world.getWidth() && i >= 0 && j < world.getHeight() && j >= 0 && getDistancePointToPoint(x, y, i, j) == 1) {
+                if (i < world.getWidth() && i >= 0 && j < world.getHeight() && j >= 0 && getDistancePointToPoint(x, y, i, j) == 1 && !(self.getX() == i && self.getY() == j)) {
                     if (trueMapOfPoints[i][j] > valueOfCell) {
                         return new thePoint(i, j);
                     }
