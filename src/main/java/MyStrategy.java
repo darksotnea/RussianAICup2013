@@ -1117,7 +1117,7 @@ public final class MyStrategy implements Strategy {
                     return true;
                 }
 
-                if (listOfEnemyTroopers.size() == 0 && !(targetX == localTargetX && targetY == localTargetY || targetX == globalTargetX && targetY == globalTargetY) && !goToBonus) {
+                /*if (listOfEnemyTroopers.size() == 0 && !(targetX == localTargetX && targetY == localTargetY || targetX == globalTargetX && targetY == globalTargetY) && !goToBonus) {
                     LinkedList<thePoint> tempPath1 = lee(self, self.getX(), self.getY(), targetX, targetY, true);
                     LinkedList<thePoint> tempPath2 = lee(self, self.getX(), self.getY(), targetX, targetY, false);
                     double dist = self.getDistanceTo(targetX, targetY);
@@ -1134,7 +1134,7 @@ public final class MyStrategy implements Strategy {
                         }
                     }
 
-                }
+                }*/
 
                 //избегание плохих позиций, если следующая ячейка в таблице trueMapOfPoints == 2, то тогда если её можно обойти за кол-во ходов текущего пути + 5, идём в обход, если нельзя, то встаём и пробуем пройти уже в положении STANDING.
                 if (trueMapOfPoints[pathOfTrooper.get(1).getX()][pathOfTrooper.get(1).getY()] == 2 && self.getActionPoints() < 2 * getCostMoveWithStance(self) && !goToSafePlace && !goThrowGrenade && !goToBonus) {
@@ -1752,6 +1752,26 @@ public final class MyStrategy implements Strategy {
                     return true;
                 }
             }
+
+            if (listOfEnemyTroopers.size() == 0 && !(targetX == localTargetX && targetY == localTargetY || targetX == globalTargetX && targetY == globalTargetY) && !goToBonus) {
+                LinkedList<thePoint> tempPath1 = lee(self, self.getX(), self.getY(), targetX, targetY, true);
+                LinkedList<thePoint> tempPath2 = lee(self, self.getX(), self.getY(), targetX, targetY, false);
+                double dist = self.getDistanceTo(targetX, targetY);
+
+                if (tempPath1 != null && tempPath1.size() > 1 && tempPath2 != null && tempPath2.size() > 1 && tempPath1.size() < tempPath2.size() + 5 && tempPath1.size() > dist + 4) {
+                    thePoint point = findCloseCell(self, targetX, targetY, true);
+                    if (point != null && goOnPath(self, point.getX(), point.getY(), false)) {
+                        return true;
+                    }
+                } else if (tempPath2 != null && tempPath2.size() > 1 && tempPath2.size() > dist + 4) {
+                    thePoint point = findCloseCell(self, targetX, targetY, false);
+                    if (point != null && goOnPath(self, point.getX(), point.getY(), false)) {
+                        return true;
+                    }
+                }
+
+            }
+
         }
 
         return false;
