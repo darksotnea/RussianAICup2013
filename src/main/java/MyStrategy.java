@@ -26,7 +26,7 @@ public final class MyStrategy implements Strategy {
     private static int localTargetX = 100;
     private static int localTargetY = 100;
     private static boolean isDetectANextTrooper = false;
-    private static boolean goBackAfterExplore = false;
+    private static boolean isAfterExplore = false;
     private static boolean detectEnemyByTeam = false;
     private static boolean getHelpFromAir = false;
     private static boolean needHelpFromAir = false;
@@ -165,7 +165,7 @@ public final class MyStrategy implements Strategy {
             goToSafePlace = false;
             saveMoveSafePlace = -1;
 
-            goBackAfterExplore = false;
+            isAfterExplore = false;
 
             savedTrooperId = -1;
             idOfTrooperStop = -1;
@@ -529,7 +529,7 @@ public final class MyStrategy implements Strategy {
             }
         }
 
-        if (goBackAfterExplore && listOfEnemys.size() == 0) {
+        if (isAfterExplore && safePoint == null) {
             if (complatedPathOfTrooper != null && complatedPathOfTrooper.size() > 1 && goOnPath(self, complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getX(), complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getY(), false)) {
                 return;
             }
@@ -1136,7 +1136,7 @@ public final class MyStrategy implements Strategy {
                 }*/
 
                 //избегание плохих позиций, если следующая ячейка в таблице trueMapOfPoints == 2, то тогда если её можно обойти за кол-во ходов текущего пути + 5, идём в обход, если нельзя, то встаём и пробуем пройти уже в положении STANDING.
-                if (trueMapOfPoints[pathOfTrooper.get(1).getX()][pathOfTrooper.get(1).getY()] == 2 && self.getActionPoints() < 2 * getCostMoveWithStance(self) && !goToSafePlace && !goThrowGrenade && !goToBonus) {
+                if (trueMapOfPoints[pathOfTrooper.get(1).getX()][pathOfTrooper.get(1).getY()] == 2 && self.getActionPoints() < 2 * getCostMoveWithStance(self) && !goToSafePlace && !isAfterExplore && !goThrowGrenade && !goToBonus) {
                     if (self.getActionPoints() >= getCostMoveWithStance(self)) {
                         cellsInt[pathOfTrooper.get(1).getX()][pathOfTrooper.get(1).getY()] = -5;
                         LinkedList<thePoint> tempPath = lee(self, self.getX(), self.getY(), targetX, targetY, true);
@@ -1156,24 +1156,24 @@ public final class MyStrategy implements Strategy {
                     }
                 }
 
-                if (trueMapOfPoints[pathOfTrooper.get(1).getX()][pathOfTrooper.get(1).getY()] == 4 && listOfEnemyTroopers.size() == 0 && self.getActionPoints() >= getCostMoveWithStance(self) && self.getActionPoints() < getCostMoveWithStance(self) * 2 && targetTrooper == null && localTargetX != 100 && !goToSafePlace && !goThrowGrenade && !goToBonus) {
+                if (trueMapOfPoints[pathOfTrooper.get(1).getX()][pathOfTrooper.get(1).getY()] == 4 && listOfEnemyTroopers.size() == 0 && self.getActionPoints() >= getCostMoveWithStance(self) && self.getActionPoints() < getCostMoveWithStance(self) * 2 && targetTrooper == null && localTargetX != 100 && !goToSafePlace && !goThrowGrenade && !goToBonus && !isAfterExplore) {
                     move.setAction(ActionType.END_TURN);
                     return true;
                 }
 
-                if(self.getActionPoints() < 4 && !goToSafePlace && !goThrowGrenade && !goBackAfterExplore && trueMapOfPoints[self.getX()][self.getY()] != 2) {
+                if(self.getActionPoints() < 4 && !goToSafePlace && !goThrowGrenade && !isAfterExplore && trueMapOfPoints[self.getX()][self.getY()] != 2) {
                     move.setAction(ActionType.END_TURN);
                     return true;
                 }
 
-                if (goBackAfterExplore) {
-                    LinkedList<thePoint> tempPath = lee(self, self.getX(), self.getY(), targetTrooper.getX(), targetTrooper.getY(), true);
+                if (isAfterExplore) {
+                    LinkedList<thePoint> tempPath = lee(self, self.getX(), self.getY(), targetX, targetY, true);
                     if (tempPath != null && tempPath.size() > 1) {
                         move.setAction(ActionType.MOVE);
                         move.setX(tempPath.get(1).getX());
                         move.setY(tempPath.get(1).getY());
 
-                        if (!testTail(self, tempPath, targetTrooper.getX(), targetTrooper.getY())) {
+                        if (!testTail(self, tempPath, targetX, targetY)) {
                             return false;
                         }
 
@@ -1730,7 +1730,7 @@ public final class MyStrategy implements Strategy {
                     return true;
                 }
             }
-
+            //TODO подумать, очень стрёмная штука, юнит уходит часто в отрыв при тем более при малом AP или например это ком и юниты вылетают из радиуса 5
             if (clearSelfArea(self, 1)) {
                 if (self.getActionPoints() >= getCostMoveWithStance(self) * 3) {
                     if (goOnPath(self, targetX, targetY, false)) {
@@ -1785,12 +1785,12 @@ public final class MyStrategy implements Strategy {
                 LinkedList<thePoint> tempPath2 = lee(self, self.getX(), self.getY(), targetX, targetY, false);
                 double dist = self.getDistanceTo(targetX, targetY);
 
-                if (tempPath1 != null && tempPath1.size() > 1 && tempPath2 != null && tempPath2.size() > 1 && tempPath1.size() < tempPath2.size() + 5 && tempPath1.size() > dist + 4) {
+                if (tempPath1 != null && tempPath1.size() > 1 && tempPath2 != null && tempPath2.size() > 1 && tempPath1.size() < tempPath2.size() + 5 && tempPath1.size() > dist + 5) {
                     thePoint point = findCloseCell(self, targetX, targetY, true);
                     if (point != null && goOnPath(self, point.getX(), point.getY(), false)) {
                         return true;
                     }
-                } else if (tempPath2 != null && tempPath2.size() > 1 && tempPath2.size() > dist + 4) {
+                } else if (tempPath2 != null && tempPath2.size() > 1 && tempPath2.size() > dist + 5) {
                     thePoint point = findCloseCell(self, targetX, targetY, false);
                     if (point != null && goOnPath(self, point.getX(), point.getY(), false)) {
                         return true;
@@ -2596,6 +2596,25 @@ public final class MyStrategy implements Strategy {
             if (self.getActionPoints() > 0) {
 
                 boolean test = false;
+
+                if (targetHeal != null) {
+
+                    LinkedList<thePoint> tempPath1 = lee(self, self.getX(), self.getY(), targetHeal.getX(), targetHeal.getY(), true);
+
+                    if (tempPath1 != null && tempPath1.size() > 1 && self.getActionPoints() < (tempPath1.size() - 2) * game.getStandingMoveCost()) {
+
+                        double len = 50;
+                        needHeal = false;
+
+                        for (Trooper trooper : troopers) {
+                            needHeal = trooper.isTeammate() && trooper.getHitpoints() < HP_WHEN_HEAL && self.getDistanceTo(trooper) < len;
+                            if (needHeal) {
+                                len = self.getDistanceTo(trooper);
+                                targetHeal = trooper;
+                            }
+                        }
+                    }
+                }
 
                 for (Trooper troop : troopers) {
                     if (troop.isTeammate() && targetHeal != null && targetHeal.getId() == troop.getId() && troop.getHitpoints() < HP_WHEN_HEAL) {
@@ -4579,7 +4598,7 @@ public final class MyStrategy implements Strategy {
                     }
 
                     if (self.getActionPoints() - (tempPath.size() - 1) * getCostMoveWithStance(self) >= 4) {
-                        goBackAfterExplore = true;
+                        isAfterExplore = true;
                         if (goOnPath(self, target.getX(), target.getY(), true)) {
                             return true;
                         }
@@ -4666,6 +4685,7 @@ public final class MyStrategy implements Strategy {
                         if (tempPath != null && tempPath.size() > 1) {
                             x1 = tempPath1.get(i).getX();
                             y1 = tempPath1.get(i).getY();
+                            isAfterExplore = true;
                             break;
                         }
                     }
