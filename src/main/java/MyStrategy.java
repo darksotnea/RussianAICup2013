@@ -25,6 +25,7 @@ public final class MyStrategy implements Strategy {
     private static int lastMoveY = 0;
     private static int localTargetX = 100;
     private static int localTargetY = 100;
+    private static boolean isDetectANextTrooper = false;
     private static boolean goBackAfterExplore = false;
     private static boolean detectEnemyByTeam = false;
     private static boolean getHelpFromAir = false;
@@ -169,6 +170,8 @@ public final class MyStrategy implements Strategy {
             savedTrooperId = -1;
             idOfTrooperStop = -1;
 
+            isDetectANextTrooper = true;
+
             forwardTrooper = -1;
 
             bonusTarget = null;
@@ -188,6 +191,7 @@ public final class MyStrategy implements Strategy {
                                 if (stayOnTailList.get(i).getX() == trooper.getX() && stayOnTailList.get(i).getY() == trooper.getY()) {
 
                                     stayOnTailList.get(i).indexOfTailTime++;
+                                    stayOnTailList.get(i).worldMove++;
                                     flag = true;
                                     break;
 
@@ -482,13 +486,12 @@ public final class MyStrategy implements Strategy {
         orderMove(self);
 
         //если долго стоим на месте, то значит тупиковая ситуация, выходим из неё при помощи conductTheWar
-        for (Trooper trooper : troopers) {
-            boolean flag = false;
-            if (self.getType() == trooper.getType() && trooper.isTeammate()) {
-                for (int i = 0; i < hpOfTroopers.length; i++) {
-                    if (trooper.getId() == hpOfTroopers[i][0]) {
-                        if (world.getMoveIndex() == stayOnTailList.get(i).worldMove) {
-
+        if (isDetectANextTrooper) {
+            for (Trooper trooper : troopers) {
+                boolean flag = false;
+                if (self.getType() == trooper.getType() && trooper.isTeammate()) {
+                    for (int i = 0; i < hpOfTroopers.length; i++) {
+                        if (trooper.getId() == hpOfTroopers[i][0]) {
                             if (stayOnTailList.get(i).getX() == self.getX() && stayOnTailList.get(i).getY() == self.getY()) {
 
                                 if (stayOnTailList.get(i).indexOfTailTime >= 5) {
@@ -510,23 +513,19 @@ public final class MyStrategy implements Strategy {
                                         }
                                     }
                                 }
-                                stayOnTailList.get(i).worldMove++;
+                                isDetectANextTrooper = false;
                                 flag = true;
                                 break;
                             } else {
                                 flag = true;
                                 break;
                             }
-
-                        } else if (world.getMoveIndex() != stayOnTailList.get(i).worldMove) {
-                            flag = true;
-                            break;
                         }
                     }
                 }
-            }
-            if (flag) {
-                break;
+                if (flag) {
+                    break;
+                }
             }
         }
 
@@ -1264,7 +1263,15 @@ public final class MyStrategy implements Strategy {
 
                     }
 
-                    if (goOnPath(self, troopers[indexOfSniper].getX(), troopers[indexOfSniper].getY(), false)) {
+                    boolean flag = false;
+
+                    for (Trooper trooper : listOfEnemyTroopers) {
+                        if (canSeeOrCanShoot(trooper, self, true)) {
+                            flag = true;
+                        }
+                    }
+
+                    if (!flag && goOnPath(self, troopers[indexOfSniper].getX(), troopers[indexOfSniper].getY(), false)) {
                         return true;
                     }
 
@@ -4993,7 +5000,7 @@ public final class MyStrategy implements Strategy {
         if (indexOfScout != -1) {
             tempTrooper = troopers[indexOfScout];
             path2 = lee(self, self.getX(), self.getY(), tempTrooper.getX(), tempTrooper.getY(), false);
-            if(path2 != null && path2.size() > 1 && path2.size() <= 5) {
+            if(path2 != null && path2.size() > 1 && path2.size() <= 7) {
                 path2 = null;
                 path2 = lee(tempTrooper, tempTrooper.getX(), tempTrooper.getY(), targetX, targetY, false);
 
@@ -5060,7 +5067,7 @@ public final class MyStrategy implements Strategy {
 
                 tempTrooper = troopers[indexOfCommander];
                 path2 = lee(self, self.getX(), self.getY(), tempTrooper.getX(), tempTrooper.getY(), false);
-                if(path2 != null && path2.size() > 1 && path2.size() <= 5) {
+                if(path2 != null && path2.size() > 1 && path2.size() <= 7) {
                     path2 = null;
                     path2 = lee(tempTrooper, tempTrooper.getX(), tempTrooper.getY(), targetX, targetY, false);
 
@@ -5127,7 +5134,7 @@ public final class MyStrategy implements Strategy {
 
                     tempTrooper = troopers[indexOfSoldier];
                     path2 = lee(self, self.getX(), self.getY(), tempTrooper.getX(), tempTrooper.getY(), false);
-                    if(path2 != null && path2.size() > 1 && path2.size() <= 5) {
+                    if(path2 != null && path2.size() > 1 && path2.size() <= 7) {
                         path2 = null;
                         path2 = lee(tempTrooper, tempTrooper.getX(), tempTrooper.getY(), targetX, targetY, false);
 
@@ -5194,7 +5201,7 @@ public final class MyStrategy implements Strategy {
 
                         tempTrooper = troopers[indexOfMedic];
                         path2 = lee(self, self.getX(), self.getY(), tempTrooper.getX(), tempTrooper.getY(), false);
-                        if(path2 != null && path2.size() > 1 && path2.size() <= 5) {
+                        if(path2 != null && path2.size() > 1 && path2.size() <= 7) {
                             path2 = null;
                             path2 = lee(tempTrooper, tempTrooper.getX(), tempTrooper.getY(), targetX, targetY, false);
 
