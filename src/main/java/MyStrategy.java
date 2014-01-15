@@ -530,7 +530,7 @@ public final class MyStrategy implements Strategy {
             }
         }
 
-        if (goBackAfterExplore) {
+        if (goBackAfterExplore && listOfEnemys.size() == 0) {
             if (complatedPathOfTrooper != null && complatedPathOfTrooper.size() > 1 && goOnPath(self, complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getX(), complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getY(), false)) {
                 return;
             }
@@ -1167,7 +1167,7 @@ public final class MyStrategy implements Strategy {
                     return true;
                 }
 
-                /*if (goBackAfterExplore) {
+                if (goBackAfterExplore) {
                     LinkedList<thePoint> tempPath = lee(self, self.getX(), self.getY(), targetTrooper.getX(), targetTrooper.getY(), true);
                     if (tempPath != null && tempPath.size() > 1) {
                         move.setAction(ActionType.MOVE);
@@ -1185,7 +1185,7 @@ public final class MyStrategy implements Strategy {
                             return true;
                         }
                     }
-                }*/
+                }
 
                 move.setAction(ActionType.MOVE);
                 move.setX(pathOfTrooper.get(1).getX());
