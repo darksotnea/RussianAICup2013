@@ -531,6 +531,7 @@ public final class MyStrategy implements Strategy {
 
         if (isAfterExplore && safePoint == null) {
             if (complatedPathOfTrooper != null && complatedPathOfTrooper.size() > 1 && goOnPath(self, complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getX(), complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getY(), false)) {
+                isAfterExplore = false;
                 return;
             }
         }
