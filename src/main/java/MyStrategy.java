@@ -1167,6 +1167,26 @@ public final class MyStrategy implements Strategy {
                     return true;
                 }
 
+                /*if (goBackAfterExplore) {
+                    LinkedList<thePoint> tempPath = lee(self, self.getX(), self.getY(), targetTrooper.getX(), targetTrooper.getY(), true);
+                    if (tempPath != null && tempPath.size() > 1) {
+                        move.setAction(ActionType.MOVE);
+                        move.setX(tempPath.get(1).getX());
+                        move.setY(tempPath.get(1).getY());
+
+                        if (!testTail(self, tempPath, targetTrooper.getX(), targetTrooper.getY())) {
+                            return false;
+                        }
+
+                        if (!(self.getX() == move.getX() && self.getY() == move.getY())) {
+                            lastMoveX = self.getX();
+                            lastMoveY = self.getY();
+                            complatedPathOfTrooper.add(new thePoint(lastMoveX, lastMoveY));
+                            return true;
+                        }
+                    }
+                }*/
+
                 move.setAction(ActionType.MOVE);
                 move.setX(pathOfTrooper.get(1).getX());
                 move.setY(pathOfTrooper.get(1).getY());
