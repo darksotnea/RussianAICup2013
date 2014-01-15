@@ -253,7 +253,7 @@ public final class MyStrategy implements Strategy {
                     }
                 }
             }
-            if (targetHeal != null && self.getDistanceTo(targetHeal) <= 1) {
+            if (self.getType() == TrooperType.FIELD_MEDIC && targetHeal != null && self.getDistanceTo(targetHeal) <= 1) {
                 heal(self, targetHeal);
                 return;
             }
