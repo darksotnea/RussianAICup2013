@@ -1056,7 +1056,7 @@ public final class MyStrategy implements Strategy {
                 }
 
                 //проверка на попадание в радиус командора, если выходишь, возврат обратно
-                if (indexOfCommander != -1 && self.getDistanceTo(troopers[indexOfCommander]) > AREA_OF_COMMANDER) {
+                if (indexOfCommander != -1 && self.getDistanceTo(troopers[indexOfCommander]) > AREA_OF_COMMANDER && self.getType() != TrooperType.SCOUT || indexOfCommander != -1 && self.getDistanceTo(troopers[indexOfCommander]) > 6 && self.getType() == TrooperType.SCOUT) {
                     targetX = troopers[indexOfCommander].getX();
                     targetY = troopers[indexOfCommander].getY();
                 }
@@ -1080,9 +1080,15 @@ public final class MyStrategy implements Strategy {
                 targetY = troopers[indexOfCommander].getY();
             }
 
-            if (indexOfScout != -1 && indexOfSniper != -1 && self.getType() == TrooperType.SNIPER && self.getDistanceTo(troopers[indexOfScout]) > 3) {
+            if (indexOfScout != -1 && indexOfSniper != -1 && self.getType() == TrooperType.SNIPER && self.getDistanceTo(troopers[indexOfScout]) > 4) {
                 targetX = troopers[indexOfScout].getX();
                 targetY = troopers[indexOfScout].getY();
+            }
+
+            // если медик жив и мало хп, то бежим к медику
+            if (indexOfMedic != -1 && self.getHitpoints() < HP_WHEN_HEAL && self.getType() != TrooperType.FIELD_MEDIC) {
+                targetX = troopers[indexOfMedic].getX();
+                targetY = troopers[indexOfMedic].getY();
             }
 
             //чтобы медик не бежал первым!! так как его обзор очень маленький, первым можно бежать если осталось 2 юнита
