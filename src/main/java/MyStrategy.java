@@ -2826,6 +2826,16 @@ public final class MyStrategy implements Strategy {
                                 move.setAction(ActionType.LOWER_STANCE);
                                 return true;
                             } else {
+                                boolean flag = false;
+                                for (Trooper trooper : listOfEnemyTroopers) {
+                                    if (world.isVisible(trooper.getVisionRange(), trooper.getX(), trooper.getY(), TrooperStance.STANDING, self.getX(), self.getY(), self.getStance()) || trooper.getType() !=TrooperType.SNIPER && world.isVisible(trooper.getShootingRange(), trooper.getX(), trooper.getY(), TrooperStance.STANDING, self.getX(), self.getY(), self.getStance())) {
+                                        if (self.getActionPoints() >= game.getStanceChangeCost() && self.getStance() != TrooperStance.PRONE) {
+                                            move.setAction(ActionType.LOWER_STANCE);
+                                            return true;
+                                        }
+                                    }
+                                }
+
                                 move.setAction(ActionType.END_TURN);
                                 return true;
                             }
