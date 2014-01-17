@@ -1393,17 +1393,17 @@ public final class MyStrategy implements Strategy {
                                 if (goOnPath(self, troopers[indexOfSniper].getX(), troopers[indexOfSniper].getY(), false)) {
                                     return true;
                                 }
-                            } else {
+                            }/* else {
                                 if (canShootOnTarget(self, trooper)) {
                                     shootOnTarget(self, trooper);
                                     return true;
                                 }
-                            }
+                            }*/
                         }
 
                     }
 
-                    boolean flag = false;
+                   /* boolean flag = false;
 
                     for (Trooper trooper : listOfEnemyTroopers) {
                         if (canSeeOrCanShoot(trooper, self, true)) {
@@ -1413,7 +1413,7 @@ public final class MyStrategy implements Strategy {
 
                     if (!flag && goOnPath(self, troopers[indexOfSniper].getX(), troopers[indexOfSniper].getY(), false)) {
                         return true;
-                    }
+                    }*/
 
                 } else if (indexOfSniper == -1 && indexOfSoldier != -1 && self.getDistanceTo(troopers[indexOfSoldier]) > 2) {
                     for (Trooper trooper : listOfEnemyTroopers) {
@@ -1443,18 +1443,18 @@ public final class MyStrategy implements Strategy {
                                 if (goOnPath(self, troopers[indexOfCommander].getX(), troopers[indexOfCommander].getY(), false)) {
                                     return true;
                                 }
-                            } else {
+                            }/* else {
                                 if (canShootOnTarget(self, trooper)) {
                                     shootOnTarget(self, trooper);
                                     return true;
                                 }
-                            }
+                            }*/
                         }
                     }
 
-                    if (goOnPath(self, troopers[indexOfCommander].getX(), troopers[indexOfCommander].getY(), false)) {
+                    /*if (goOnPath(self, troopers[indexOfCommander].getX(), troopers[indexOfCommander].getY(), false)) {
                         return true;
-                    }
+                    }*/
                 }
             }
         }
@@ -2748,25 +2748,27 @@ public final class MyStrategy implements Strategy {
                 if (tempPoint3 != null) {
                     tempPoint = tempPoint3;
                 } else {
+
                     tempPoint1 = findNotAchievableTail(self, true, 0);
                     tempPoint2 = findNotAchievableTail(self, false, 0);
-                }
 
-                if (tempPoint1 != null && self.getX() == tempPoint1.getX() && self.getY() == tempPoint1.getY()) {
-                    if (self.getActionPoints() >= game.getStanceChangeCost()) {
-                        move.setAction(ActionType.LOWER_STANCE);
-                        return true;
+                    if (tempPoint1 != null && self.getX() == tempPoint1.getX() && self.getY() == tempPoint1.getY()) {
+                        if (self.getActionPoints() >= game.getStanceChangeCost()) {
+                            move.setAction(ActionType.LOWER_STANCE);
+                            return true;
+                        }
                     }
-                }
 
-                if (tempPoint1 == null) {
-                    tempPoint = tempPoint2;
-                } else if (tempPoint2 == null) {
-                    tempPoint = tempPoint1;
-                } else if (self.getDistanceTo(tempPoint1.getX(), tempPoint1.getY()) <= self.getDistanceTo(tempPoint2.getX(), tempPoint2.getY())) {
-                    tempPoint = tempPoint2;
-                } else {
-                    tempPoint = tempPoint1;
+                    if (tempPoint1 == null) {
+                        tempPoint = tempPoint2;
+                    } else if (tempPoint2 == null) {
+                        tempPoint = tempPoint1;
+                    } else if (self.getDistanceTo(tempPoint1.getX(), tempPoint1.getY()) <= self.getDistanceTo(tempPoint2.getX(), tempPoint2.getY())) {
+                        tempPoint = tempPoint2;
+                    } else {
+                        tempPoint = tempPoint1;
+                    }
+
                 }
 
                 if (tempPoint != null) {
