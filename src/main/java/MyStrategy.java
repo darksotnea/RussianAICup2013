@@ -1202,21 +1202,21 @@ public final class MyStrategy implements Strategy {
 
             if (goToSafePlace) {
 /*                if(safePoint != null) {*/
-                    goToBonus = false;
-                    bonusTarget = null;
-                    if (self.getStance() != TrooperStance.STANDING && !(self.getX() == safePoint.getX() && self.getY() == safePoint.getY())) {
-                        move.setAction(ActionType.RAISE_STANCE);
+                goToBonus = false;
+                bonusTarget = null;
+                if (self.getStance() != TrooperStance.STANDING && !(self.getX() == safePoint.getX() && self.getY() == safePoint.getY())) {
+                    move.setAction(ActionType.RAISE_STANCE);
+                    return true;
+                }
+                if (safePoint.getX() == self.getX() && safePoint.getY() == self.getY()) {
+                    if (self.getActionPoints() >= game.getStanceChangeCost() && (self.getStance() == TrooperStance.STANDING && safeStance == TrooperStance.KNEELING || self.getStance() == TrooperStance.KNEELING && safeStance == TrooperStance.PRONE)) {
+                        goToSafePlace = false;
+                        safePoint = null;
+                        move.setAction(ActionType.LOWER_STANCE);
                         return true;
                     }
-                    if (safePoint.getX() == self.getX() && safePoint.getY() == self.getY()) {
-                        if (self.getActionPoints() >= game.getStanceChangeCost() && (self.getStance() == TrooperStance.STANDING && safeStance == TrooperStance.KNEELING || self.getStance() == TrooperStance.KNEELING && safeStance == TrooperStance.PRONE)) {
-                            goToSafePlace = false;
-                            safePoint = null;
-                            move.setAction(ActionType.LOWER_STANCE);
-                            return true;
-                        }
-                    }
-                    pathOfTrooper = lee(self, self.getX(), self.getY(), safePoint.getX(), safePoint.getY(), true);
+                }
+                pathOfTrooper = lee(self, self.getX(), self.getY(), safePoint.getX(), safePoint.getY(), true);
                 /*} else {
                     goToBonus = false;
                     bonusTarget = null;
