@@ -1,6 +1,7 @@
 import model.*;
 
 import java.util.*;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import static java.lang.StrictMath.hypot;
 
@@ -299,10 +300,6 @@ public final class MyStrategy implements Strategy {
             beginBattle = false;
         }
 
-        if (detectEnemyByTeam == true && targetTrooper == null && localTargetX == 100) {
-            detectEnemyByTeam = false;
-        }
-
         if (!(saveMoveWorld == world.getMoveIndex() || saveMoveWorld == world.getMoveIndex() - 1)) {
             istroopersUnderAttack = false;
         }
@@ -336,8 +333,10 @@ public final class MyStrategy implements Strategy {
                 }
             }
 
-            move.setAction(ActionType.END_TURN);
-            return;
+            if(listOfEnemyTroopers.size() != 0) {
+                move.setAction(ActionType.END_TURN);
+                return;
+            }
         }
 
         if (isUseLastMove && listOfEnemys.size() == 0) {
@@ -1072,6 +1071,19 @@ public final class MyStrategy implements Strategy {
                 return;
             }
 
+            if (detectEnemyByTeam && listOfEnemyTroopers.size() == 0 && targetY == localTargetY && targetX == localTargetX) {
+                LinkedList<thePoint> path = lee(self, self.getX(), self.getY(), localTargetX, localTargetY, true);
+                if (path != null && path.size() > 1 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] > 2 && self.getActionPoints() > 5) {
+                    if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), true)) {
+                        safeStance = TrooperStance.PRONE;
+                        return;
+                    }
+                } else if(self.getStance() != safeStance) {
+                    move.setAction(ActionType.LOWER_STANCE);
+                    return;
+                }
+            }
+
             if(listOfSowEnemys.size() != 0 && self.getType() == TrooperType.SNIPER) {
                 if(self.getDistanceTo(localTargetX, localTargetY) > self.getShootingRange()) {
                     if (self.getDistanceTo(localTargetX, localTargetY) <= self.getShootingRange() + 2 && self.getStance() == TrooperStance.STANDING || self.getDistanceTo(localTargetX, localTargetY) <= self.getShootingRange() + 1 && self.getStance() == TrooperStance.KNEELING) {
@@ -1201,7 +1213,8 @@ public final class MyStrategy implements Strategy {
             LinkedList<thePoint> pathOfTrooper;
 
             if (goToSafePlace) {
-/*                if(safePoint != null) {*/
+                pathOfTrooper = lee(self, self.getX(), self.getY(), targetX, targetY, true);
+                if(safePoint != null) {
                     goToBonus = false;
                     bonusTarget = null;
                     if (self.getStance() != TrooperStance.STANDING && !(self.getX() == safePoint.getX() && self.getY() == safePoint.getY())) {
@@ -1217,7 +1230,7 @@ public final class MyStrategy implements Strategy {
                         }
                     }
                     pathOfTrooper = lee(self, self.getX(), self.getY(), safePoint.getX(), safePoint.getY(), true);
-                /*} else {
+                }/* else {
                     goToBonus = false;
                     bonusTarget = null;
                     if (self.getStance() != TrooperStance.STANDING && !(self.getX() == targetX && self.getY() == targetY)) {
@@ -1241,6 +1254,7 @@ public final class MyStrategy implements Strategy {
                     pathOfTrooper = lee(self, self.getX(), self.getY(), targetX, targetY, false);
                 }
             }
+
             if (pathOfTrooper != null && pathOfTrooper.size() > 1) {
 
                 if (self.getActionPoints() >= game.getStanceChangeCost() && self.getType() != TrooperType.SNIPER && self.getStance() != TrooperStance.STANDING) {
@@ -1490,9 +1504,7 @@ public final class MyStrategy implements Strategy {
                 targetTrooper = choosenOne;
             }
 
-            if (detectEnemyByTeam == false) {
-                detectEnemyByTeam = true;
-            }
+            detectEnemyByTeam = true;
 
             boolean isVisibleForEnemys = false;
             for (Trooper trooper : listOfEnemyTroopers) {
@@ -2718,14 +2730,6 @@ public final class MyStrategy implements Strategy {
     boolean goHeal(Trooper self) {
         boolean needHeal;
         boolean needHealTarget = false;
-
-        /*if (detectEnemyByTeam && beginBattle == false) {
-            if (self.getType() == TrooperType.FIELD_MEDIC) {
-                if (goDown(self)) {
-                    return true;
-                }
-            }
-        }*/
 
         if (targetTrooper != null && self.getHitpoints() < 65) {
             boolean safePlace = true;
@@ -4024,6 +4028,7 @@ public final class MyStrategy implements Strategy {
             localTargetX = 100;
             localTargetY = 100;
             beginBattle = false;
+            detectEnemyByTeam = false;
         }
 
         if (targetTrooper != null) {
