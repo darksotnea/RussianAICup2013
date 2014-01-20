@@ -1066,7 +1066,7 @@ public final class MyStrategy implements Strategy {
         if (self.getActionPoints() >= game.getStanceChangeCost()) {
 
             //встаём, если нет врагов и если находимся не в стоячей позиции
-            if (localTargetX == 100 && self.getStance() != TrooperStance.STANDING || ( !(self.getActionPoints() < 4 && self.getStance() == TrooperStance.PRONE) && (listOfSowEnemys.size() == 0 && (self.getStance() != TrooperStance.STANDING && targetTrooper == null && self.getType() != TrooperType.SNIPER || self.getStance() != TrooperStance.STANDING && self.getType() == TrooperType.SNIPER && targetTrooper == null && !(localTargetX != 100 && world.isVisible(self.getVisionRange(), self.getX(), self.getY(), self.getStance(), localTargetX, localTargetY, TrooperStance.PRONE))))) ) {
+            if (localTargetX == 100 && self.getStance() != TrooperStance.STANDING || ( !(self.getActionPoints() < 6 && self.getStance() == TrooperStance.PRONE || self.getActionPoints() < 4 && self.getStance() == TrooperStance.KNEELING) && (listOfSowEnemys.size() == 0 && self.getActionPoints() >= 6 && (self.getStance() != TrooperStance.STANDING && targetTrooper == null && self.getType() != TrooperType.SNIPER || self.getStance() != TrooperStance.STANDING && self.getType() == TrooperType.SNIPER && targetTrooper == null && !(localTargetX != 100 && world.isVisible(self.getVisionRange(), self.getX(), self.getY(), self.getStance(), localTargetX, localTargetY, TrooperStance.PRONE))))) ) {
                 move.setAction(ActionType.RAISE_STANCE);
                 return;
             }
@@ -1082,11 +1082,12 @@ public final class MyStrategy implements Strategy {
                         return;
                     }
                 } else {
-                    safeStance = TrooperStance.PRONE;
-                    if(self.getStance() != safeStance) {
+                    if(self.getStance() != TrooperStance.PRONE) {
                         move.setAction(ActionType.LOWER_STANCE);
                         return;
                     }
+                    move.setAction(ActionType.END_TURN);
+                    return;
                 }
             }
 
