@@ -1,5 +1,6 @@
 import model.*;
 
+import javax.rmi.PortableRemoteObject;
 import java.util.*;
 
 import static java.lang.StrictMath.hypot;
@@ -1073,11 +1074,11 @@ public final class MyStrategy implements Strategy {
             if (detectEnemyByTeam && listOfEnemyTroopers.size() == 0 && targetY == localTargetY && targetX == localTargetX) {
                 LinkedList<thePoint> path = lee(self, self.getX(), self.getY(), localTargetX, localTargetY, true);
                 if (path != null && path.size() > 1 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] > 2 && self.getActionPoints() > 5) {
-                    if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), true)) {
+                    if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), false)) {
                         return;
                     }
                 } else if(path != null && path.size() > 1 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] < 4  && self.getActionPoints() > 5) {
-                    if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), true)) {
+                    if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), false)) {
                         return;
                     }
                 } else {
@@ -1719,6 +1720,31 @@ public final class MyStrategy implements Strategy {
 
                     if (goOnPath(self, safePoint.getX(), safePoint.getY(), false)) {
                         return true;
+                    }
+                }
+
+                LinkedList<thePoint> path = lee(self, self.getX(), self.getY(), targetX, targetY, true);
+                LinkedList<thePoint> path1 = lee(self, self.getX(), self.getY(), targetX, targetY, false);
+
+                if((path1.size() > 1 && path1 != null || path != null && path.size() > 1) && self.getActionPoints() < 6) {
+                    if (path != null && path.size() > 1 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] > 2) {
+                        if(self.getStance() != TrooperStance.PRONE && detectEnemyByTeam) {
+                            move.setAction(ActionType.LOWER_STANCE);
+                            return true;
+                        }
+                        move.setAction(ActionType.END_TURN);
+                    } else if (path != null && path.size() > 1 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] < 4) {
+                        //ничего не делаем, используется goOnPath к targetTrooper-у который ниже
+                    } else if (trueMapOfPoints[path1.get(1).getX()][path1.get(1).getY()] > 2) {
+                        if(self.getStance() != TrooperStance.PRONE && detectEnemyByTeam) {
+                            move.setAction(ActionType.LOWER_STANCE);
+                            return true;
+                        }
+                        move.setAction(ActionType.END_TURN);
+                    } else {
+                        if (path1 != null && path1.size() > 1 && trueMapOfPoints[path1.get(1).getX()][path1.get(1).getY()] < 4) {
+                            //ничего не делаем, используется goOnPath к targetTrooper-у который ниже
+                        }
                     }
                 }
 
