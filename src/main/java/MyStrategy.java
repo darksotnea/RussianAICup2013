@@ -1,7 +1,6 @@
 import model.*;
 
 import java.util.*;
-import java.util.concurrent.LinkedBlockingDeque;
 
 import static java.lang.StrictMath.hypot;
 
@@ -1075,12 +1074,18 @@ public final class MyStrategy implements Strategy {
                 LinkedList<thePoint> path = lee(self, self.getX(), self.getY(), localTargetX, localTargetY, true);
                 if (path != null && path.size() > 1 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] > 2 && self.getActionPoints() > 5) {
                     if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), true)) {
-                        safeStance = TrooperStance.PRONE;
                         return;
                     }
-                } else if(self.getStance() != safeStance) {
-                    move.setAction(ActionType.LOWER_STANCE);
-                    return;
+                } else if(path != null && path.size() > 1 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] < 4  && self.getActionPoints() > 5) {
+                    if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), true)) {
+                        return;
+                    }
+                } else {
+                    safeStance = TrooperStance.PRONE;
+                    if(self.getStance() != safeStance) {
+                        move.setAction(ActionType.LOWER_STANCE);
+                        return;
+                    }
                 }
             }
 
