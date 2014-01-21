@@ -1740,19 +1740,19 @@ public final class MyStrategy implements Strategy {
 
                     if (path != null && path.size() < path1.size() + 5) {
 
-                        if (path.size() > 4 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] > 2 && self.getActionPoints() >= 6 && !world.isVisible(self.getVisionRange(), self.getX(), self.getY(), self.getStance(), targetTrooper.getX(), targetTrooper.getY(), TrooperStance.PRONE)) {
+                        if (path.size() > 4 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] > 2 && self.getActionPoints() >= 6 && !world.isVisible(self.getVisionRange() - 1, self.getX(), self.getY(), self.getStance(), targetTrooper.getX(), targetTrooper.getY(), TrooperStance.PRONE)) {
                             if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), true)) {
                                 return true;
                             }
                         }
 
-                        if(path.size() > 4 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] < 4  && self.getActionPoints() >= 8 && !world.isVisible(self.getVisionRange(), self.getX(), self.getY(), self.getStance(), targetTrooper.getX(), targetTrooper.getY(), TrooperStance.PRONE)) {
+                        if(path.size() > 4 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] < 4  && self.getActionPoints() >= 8 && !world.isVisible(self.getVisionRange() - 1, self.getX(), self.getY(), self.getStance(), targetTrooper.getX(), targetTrooper.getY(), TrooperStance.PRONE) || self.getType() == TrooperType.COMMANDER && path.size() > 4 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] < 4  && self.getActionPoints() >= 6 && !world.isVisible(self.getVisionRange() - 1, self.getX(), self.getY(), self.getStance(), targetTrooper.getX(), targetTrooper.getY(), TrooperStance.PRONE)) {
                             if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), true)) {
                                 return true;
                             }
                         }
 
-                        if(path.size() > 1 && trueMapOfPoints[path.get(0).getX()][path.get(0).getY()] < 4  && self.getActionPoints() >= 6 && !world.isVisible(self.getVisionRange(), self.getX(), self.getY(), self.getStance(), targetTrooper.getX(), targetTrooper.getY(), TrooperStance.PRONE)) {
+                        if(path.size() > 1 && trueMapOfPoints[path.get(0).getX()][path.get(0).getY()] < 4  && self.getActionPoints() >= 6 && !world.isVisible(self.getVisionRange() - 1, self.getX(), self.getY(), self.getStance(), targetTrooper.getX(), targetTrooper.getY(), TrooperStance.PRONE)) {
                             if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), true)) {
                                 return true;
                             }
