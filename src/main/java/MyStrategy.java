@@ -1074,7 +1074,7 @@ public final class MyStrategy implements Strategy {
                 return;
             }
 
-            if (detectEnemyByTeam && listOfEnemyTroopers.size() == 0 && targetY == localTargetY && targetX == localTargetX) {
+            if (detectEnemyByTeam && listOfEnemyTroopers.size() == 0 && targetY == localTargetY && targetX == localTargetX && !world.isVisible(self.getVisionRange() - 1, self.getX(), self.getY(), self.getStance(), localTargetX, localTargetY, TrooperStance.PRONE)) {
                 LinkedList<thePoint> path = lee(self, self.getX(), self.getY(), localTargetX, localTargetY, true);
 
                 if (path != null && path.size() > 4 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] > 2 && self.getActionPoints() >= 6 && !world.isVisible(self.getVisionRange() - 1, self.getX(), self.getY(), self.getStance(), localTargetX, localTargetY, TrooperStance.PRONE)) {
@@ -2109,7 +2109,7 @@ public final class MyStrategy implements Strategy {
         int x1 = -1;
         int y1 = -1;
 
-        for (int k = 0; k < W; k++) {
+        /*for (int k = 0; k < W; k++) {
             for (int m = 0; m < H; m++) {
                 if (cellsIntTemp[k][m] == BLANK && self.getDistanceTo(k, m) < moveLen && self.getDistanceTo(target) <= self.getShootingRange() && self.getDistanceTo(target) < targetDistance) {
 
@@ -2133,7 +2133,7 @@ public final class MyStrategy implements Strategy {
 
         if (x1 != -1 && y1 != -1) {
             return new thePoint(x1, y1);
-        } else {
+        } else {*/
             for(Trooper trooper : troopers) {
                 if (!trooper.isTeammate() && trooper != target) {
 
@@ -2161,7 +2161,7 @@ public final class MyStrategy implements Strategy {
 
                 }
             }
-        }
+        /*}*/
 
         if (x1 != -1 && y1 != -1) {
             return new thePoint(x1, y1);
