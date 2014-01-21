@@ -1073,22 +1073,31 @@ public final class MyStrategy implements Strategy {
 
             if (detectEnemyByTeam && listOfEnemyTroopers.size() == 0 && targetY == localTargetY && targetX == localTargetX) {
                 LinkedList<thePoint> path = lee(self, self.getX(), self.getY(), localTargetX, localTargetY, true);
-                if (path != null && path.size() > 1 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] > 2 && self.getActionPoints() > 5) {
+                if (path != null && path.size() > 1 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] > 2 && self.getActionPoints() >= 6) {
                     if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), false)) {
                         return;
                     }
-                } else if(path != null && path.size() > 1 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] < 4  && self.getActionPoints() > 5) {
+                }
+
+                if(path != null && path.size() > 1 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] < 4  && self.getActionPoints() >= 8) {
                     if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), false)) {
                         return;
                     }
-                } else {
-                    if(self.getStance() != TrooperStance.PRONE) {
-                        move.setAction(ActionType.LOWER_STANCE);
+                }
+
+                if(path != null && path.size() > 1 && trueMapOfPoints[path.get(0).getX()][path.get(0).getY()] < 4  && self.getActionPoints() >= 6) {
+                    if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), false)) {
                         return;
                     }
-                    move.setAction(ActionType.END_TURN);
+                }
+
+                if(self.getStance() != TrooperStance.PRONE) {
+                    move.setAction(ActionType.LOWER_STANCE);
                     return;
                 }
+
+                move.setAction(ActionType.END_TURN);
+                return;
             }
 
             if(listOfSowEnemys.size() != 0 && self.getType() == TrooperType.SNIPER) {
