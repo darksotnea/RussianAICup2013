@@ -1746,7 +1746,7 @@ public final class MyStrategy implements Strategy {
                             }
                         }
 
-                        if(path.size() > 4 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] < 4  && self.getActionPoints() >= 8 && !world.isVisible(self.getVisionRange() - 1, self.getX(), self.getY(), self.getStance(), targetTrooper.getX(), targetTrooper.getY(), TrooperStance.PRONE) || self.getType() == TrooperType.COMMANDER && path.size() > 4 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] < 4  && self.getActionPoints() >= 6 && !world.isVisible(self.getVisionRange() - 1, self.getX(), self.getY(), self.getStance(), targetTrooper.getX(), targetTrooper.getY(), TrooperStance.PRONE)) {
+                        if(path.size() > 4 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] < 4  && self.getActionPoints() >= 6 && !world.isVisible(self.getVisionRange() - 1, self.getX(), self.getY(), self.getStance(), targetTrooper.getX(), targetTrooper.getY(), TrooperStance.PRONE)) {
                             if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), true)) {
                                 return true;
                             }
