@@ -4427,6 +4427,9 @@ public final class MyStrategy implements Strategy {
                 for (int j = 0; j < hpOfTroopers.length; j++) {
                     if (troopers[i].getId() == hpOfTroopers[j][0] && troopers[i].getHitpoints() < hpOfTroopers[j][1]) {
                         trooperUnderAttack = (int) troopers[i].getId();
+                        localTargetX = globalTargetX;
+                        localTargetY = globalTargetY;
+                        detectEnemyByTeam = true;
                         return true;
                     }
                 }
@@ -5581,10 +5584,12 @@ public final class MyStrategy implements Strategy {
 
                 if (path1 != null && path2 != null && path2.size() - path1.size() >= 0) {
 
-                    if (trueMapOfPoints[lastMoveX][lastMoveY] > 4) {
+                    if (complatedPathOfTrooper != null && complatedPathOfTrooper.size() > 1 && trueMapOfPoints[complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getX()][complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getY()] > 4) {
 
-                        if (!isUseLastMove && goOnPath(self, lastMoveX, lastMoveY, true)) {
+                        if (!isUseLastMove && goOnPath(self, complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getX(), complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getY(), true)) {
                             isUseLastMove = true;
+                            complatedPathOfTrooper.remove(complatedPathOfTrooper.size() - 1);
+                            complatedPathOfTrooper.remove(complatedPathOfTrooper.size() - 1);
                             return true;
                         } else {
                             isUseLastMove = false;
@@ -5648,10 +5653,12 @@ public final class MyStrategy implements Strategy {
 
                     if (path1 != null && path2 != null && path2.size() - path1.size() >= 0) {
 
-                        if (trueMapOfPoints[lastMoveX][lastMoveY] > 4) {
+                        if (complatedPathOfTrooper != null && complatedPathOfTrooper.size() > 1 && trueMapOfPoints[complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getX()][complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getY()] > 4) {
 
-                            if (!isUseLastMove && goOnPath(self, lastMoveX, lastMoveY, true)) {
+                            if (!isUseLastMove && goOnPath(self, complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getX(), complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getY(), true)) {
                                 isUseLastMove = true;
+                                complatedPathOfTrooper.remove(complatedPathOfTrooper.size() - 1);
+                                complatedPathOfTrooper.remove(complatedPathOfTrooper.size() - 1);
                                 return true;
                             } else {
                                 isUseLastMove = false;
@@ -5715,10 +5722,12 @@ public final class MyStrategy implements Strategy {
 
                         if (path1 != null && path2 != null && path2.size() - path1.size() >= 0) {
 
-                            if (trueMapOfPoints[lastMoveX][lastMoveY] > 4) {
+                            if (complatedPathOfTrooper != null && complatedPathOfTrooper.size() > 1 && trueMapOfPoints[complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getX()][complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getY()] > 4) {
 
-                                if (!isUseLastMove && goOnPath(self, lastMoveX, lastMoveY, true)) {
+                                if (!isUseLastMove && goOnPath(self, complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getX(), complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getY(), true)) {
                                     isUseLastMove = true;
+                                    complatedPathOfTrooper.remove(complatedPathOfTrooper.size() - 1);
+                                    complatedPathOfTrooper.remove(complatedPathOfTrooper.size() - 1);
                                     return true;
                                 } else {
                                     isUseLastMove = false;
@@ -5782,10 +5791,12 @@ public final class MyStrategy implements Strategy {
 
                             if (path1 != null && path2 != null && path2.size() - path1.size() >= 0) {
 
-                                if (trueMapOfPoints[lastMoveX][lastMoveY] > 4) {
+                                if (complatedPathOfTrooper != null && complatedPathOfTrooper.size() > 1 && trueMapOfPoints[complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getX()][complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getY()] > 4) {
 
-                                    if (!isUseLastMove && goOnPath(self, lastMoveX, lastMoveY, true)) {
+                                    if (!isUseLastMove && goOnPath(self, complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getX(), complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getY(), true)) {
                                         isUseLastMove = true;
+                                        complatedPathOfTrooper.remove(complatedPathOfTrooper.size() - 1);
+                                        complatedPathOfTrooper.remove(complatedPathOfTrooper.size() - 1);
                                         return true;
                                     } else {
                                         isUseLastMove = false;
