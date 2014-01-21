@@ -565,6 +565,12 @@ public final class MyStrategy implements Strategy {
             processingHpOfTroopers();
         }
 
+        if(istroopersUnderAttack) {
+            localTargetX = globalTargetX;
+            localTargetY = globalTargetY;
+            detectEnemyByTeam = true;
+        }
+
         if (self.getId() == idOfTrooperStop && saveMoveSafePlace == world.getMoveIndex()) {
             for (Trooper trooper : listOfEnemyTroopers) {
                 if (canShootOnTarget(self, trooper)) {
