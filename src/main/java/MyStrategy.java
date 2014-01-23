@@ -2084,6 +2084,74 @@ public final class MyStrategy implements Strategy {
                 }
             }
 
+            if (detectEnemyByTeam && self.getActionPoints() >= game.getStanceChangeCost() && !world.isVisible(self.getVisionRange(), self.getX(), self.getY(), self.getStance(), localTargetX, localTargetY, TrooperStance.PRONE)) {
+
+                LinkedList<thePoint> path = lee(self, self.getX(), self.getY(), targetTrooper.getX(), targetTrooper.getY(), true);
+                LinkedList<thePoint> path1 = lee(self, self.getX(), self.getY(), targetTrooper.getX(), targetTrooper.getY(), false);
+
+                if (path != null && path.size() > 1 || path1 != null && path1.size() > 1) {
+
+                        if (path != null && path.size() < path1.size() + 5) {
+
+                            if (path.size() > 4 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] > 2 && self.getActionPoints() >= 6) {
+                                if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), true)) {
+                                    return true;
+                                }
+                            }
+
+                            if (path.size() > 4 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] < 4 && self.getActionPoints() >= 6) {
+                                if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), true)) {
+                                    return true;
+                                }
+                            }
+
+                            if (path.size() > 1 && trueMapOfPoints[path.get(0).getX()][path.get(0).getY()] < 4 && self.getActionPoints() >= 6) {
+                                if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), true)) {
+                                    return true;
+                                }
+                            }
+
+                            if (self.getStance() != TrooperStance.PRONE) {
+                                move.setAction(ActionType.LOWER_STANCE);
+                                return true;
+                            }
+
+                            move.setAction(ActionType.END_TURN);
+                            return true;
+
+                        } else {
+
+                            if (path.size() > 4 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] > 2 && self.getActionPoints() >= 6) {
+                                if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), false)) {
+                                    return true;
+                                }
+                            }
+
+                            if (path.size() > 4 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] < 4 && self.getActionPoints() >= 6) {
+                                if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), false)) {
+                                    return true;
+                                }
+                            }
+
+                            if (path.size() > 1 && trueMapOfPoints[path.get(0).getX()][path.get(0).getY()] < 4 && self.getActionPoints() >= 6) {
+                                if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), false)) {
+                                    return true;
+                                }
+                            }
+
+                            if (self.getStance() != TrooperStance.PRONE) {
+                                move.setAction(ActionType.LOWER_STANCE);
+                                return true;
+                            }
+
+                            move.setAction(ActionType.END_TURN);
+                            return true;
+                        }
+
+
+                }
+            }
+
             if (listOfEnemyTroopers.size() == 0/* && !(targetX == localTargetX && targetY == localTargetY || targetX == globalTargetX && targetY == globalTargetY)*/ && !goToBonus) {
                 LinkedList<thePoint> tempPath1 = lee(self, self.getX(), self.getY(), targetX, targetY, true);
                 LinkedList<thePoint> tempPath2 = lee(self, self.getX(), self.getY(), targetX, targetY, false);
