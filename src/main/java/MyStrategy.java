@@ -1066,7 +1066,7 @@ public final class MyStrategy implements Strategy {
                 return;
             }
 
-            if (self.getDistanceTo(localTargetX, localTargetY) <= 2) {
+            if (self.getDistanceTo(localTargetX, localTargetY) <= 3 && world.isVisible(self.getVisionRange(), self.getX(), self.getY(), self.getStance(), localTargetX, localTargetY, TrooperStance.PRONE)) {
                 detectEnemyByTeam = false;
             }
             if (detectEnemyByTeam && listOfEnemyTroopers.size() == 0 && targetY == localTargetY && targetX == localTargetX/* && !world.isVisible(self.getVisionRange() - 1, self.getX(), self.getY(), self.getStance(), localTargetX, localTargetY, TrooperStance.PRONE)*/) {
