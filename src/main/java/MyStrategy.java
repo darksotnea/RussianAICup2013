@@ -543,7 +543,7 @@ public final class MyStrategy implements Strategy {
         if (self.getActionPoints() >= 10) {
 
             boolean tempValue = hpIsChanged(self);
-            if(tempValue && !istroopersUnderAttack) {
+            if(tempValue/* && !istroopersUnderAttack*/) {
                 saveMoveWorld = world.getMoveIndex();
                 istroopersUnderAttack = tempValue;
             }
@@ -1729,7 +1729,7 @@ public final class MyStrategy implements Strategy {
                 }
             }
 
-            if (targetTrooper != null && self.getActionPoints() >= getCostMoveWithStance(self) && !world.isVisible(self.getShootingRange(), self.getX(), self.getY(), self.getStance(), targetTrooper.getX(), targetTrooper.getY(), targetTrooper.getStance())) {
+            if (targetTrooper != null && self.getActionPoints() >= /*getCostMoveWithStance(self)*/game.getStanceChangeCost() && !world.isVisible(self.getShootingRange(), self.getX(), self.getY(), self.getStance(), targetTrooper.getX(), targetTrooper.getY(), targetTrooper.getStance())) {
 
                 if (self.getStance() != TrooperStance.STANDING && testMoveUpAttack(self, targetTrooper)) {
                     return true;
@@ -2094,13 +2094,22 @@ public final class MyStrategy implements Strategy {
                     if (point != null && goOnPath(self, point.getX(), point.getY(), false)) {
                         return true;
                     }
+                } else if (dist > 6 && tempPath1 != null && tempPath1.size() > 1 && tempPath1.size() < tempPath2.size() + 5) {
+                    thePoint point = findCloseCell(self, targetX, targetY, true);
+                    if (point != null && goOnPath(self, point.getX(), point.getY(), true)) {
+                        return true;
+                    }
                 } else if (tempPath2 != null && tempPath2.size() > 1 && tempPath2.size() > dist + 5) {
                     thePoint point = findCloseCell(self, targetX, targetY, false);
                     if (point != null && goOnPath(self, point.getX(), point.getY(), false)) {
                         return true;
                     }
+                } else if (dist > 6 && tempPath2 != null && tempPath2.size() > 1) {
+                    thePoint point = findCloseCell(self, targetX, targetY, false);
+                    if (point != null && goOnPath(self, point.getX(), point.getY(), false)) {
+                        return true;
+                    }
                 }
-
             }
 
         }
