@@ -1066,23 +1066,39 @@ public final class MyStrategy implements Strategy {
                 return;
             }
 
-            if (detectEnemyByTeam && listOfEnemyTroopers.size() == 0 && targetY == localTargetY && targetX == localTargetX && !world.isVisible(self.getVisionRange() - 1, self.getX(), self.getY(), self.getStance(), localTargetX, localTargetY, TrooperStance.PRONE)) {
+            if (self.getDistanceTo(localTargetX, localTargetY) <= 2) {
+                detectEnemyByTeam = false;
+            }
+            if (detectEnemyByTeam && listOfEnemyTroopers.size() == 0 && targetY == localTargetY && targetX == localTargetX/* && !world.isVisible(self.getVisionRange() - 1, self.getX(), self.getY(), self.getStance(), localTargetX, localTargetY, TrooperStance.PRONE)*/) {
                 LinkedList<thePoint> path = lee(self, self.getX(), self.getY(), localTargetX, localTargetY, true);
+                LinkedList<thePoint> path1 = lee(self, self.getX(), self.getY(), localTargetX, localTargetY, false);
 
-                if (path != null && path.size() > 4 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] > 2 && self.getActionPoints() >= 6 && !world.isVisible(self.getVisionRange() - 1, self.getX(), self.getY(), self.getStance(), localTargetX, localTargetY, TrooperStance.PRONE)) {
+                if (path != null && path.size() > 4 && path.size() < path1.size() + 5 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] > 2 && self.getActionPoints() >= 6/* && !world.isVisible(self.getVisionRange() - 1, self.getX(), self.getY(), self.getStance(), localTargetX, localTargetY, TrooperStance.PRONE)*/) {
                     if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), true)) {
+                        return;
+                    }
+                } else if (path1 != null && path1.size() > 4 && trueMapOfPoints[path1.get(1).getX()][path1.get(1).getY()] > 2 && self.getActionPoints() >= 6/* && !world.isVisible(self.getVisionRange() - 1, self.getX(), self.getY(), self.getStance(), localTargetX, localTargetY, TrooperStance.PRONE)*/) {
+                    if (goOnPath(self, path1.get(1).getX(), path1.get(1).getY(), false)) {
                         return;
                     }
                 }
 
-                if (path != null && path.size() > 4 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] < 4 && self.getActionPoints() >= 6 && !world.isVisible(self.getVisionRange() - 1, self.getX(), self.getY(), self.getStance(), localTargetX, localTargetY, TrooperStance.PRONE)) {
+                if (path != null && path.size() > 4 && path.size() < path1.size() + 5 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] < 4 && self.getActionPoints() >= 6/* && !world.isVisible(self.getVisionRange() - 1, self.getX(), self.getY(), self.getStance(), localTargetX, localTargetY, TrooperStance.PRONE)*/) {
                     if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), true)) {
+                        return;
+                    }
+                } else if (path1 != null && path1.size() > 4 && trueMapOfPoints[path1.get(1).getX()][path1.get(1).getY()] < 4 && self.getActionPoints() >= 6/* && !world.isVisible(self.getVisionRange() - 1, self.getX(), self.getY(), self.getStance(), localTargetX, localTargetY, TrooperStance.PRONE)*/) {
+                    if (goOnPath(self, path1.get(1).getX(), path1.get(1).getY(), false)) {
                         return;
                     }
                 }
 
-                if (path != null && path.size() > 1 && trueMapOfPoints[path.get(0).getX()][path.get(0).getY()] < 4 && self.getActionPoints() >= 6 && !world.isVisible(self.getVisionRange() - 1, self.getX(), self.getY(), self.getStance(), localTargetX, localTargetY, TrooperStance.PRONE)) {
+                if (path != null && path.size() > 1 && path.size() < path1.size() + 5 && trueMapOfPoints[path.get(0).getX()][path.get(0).getY()] < 4 && self.getActionPoints() >= 6/* && !world.isVisible(self.getVisionRange() - 1, self.getX(), self.getY(), self.getStance(), localTargetX, localTargetY, TrooperStance.PRONE)*/) {
                     if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), true)) {
+                        return;
+                    }
+                } else if (path1 != null && path1.size() > 1 && trueMapOfPoints[path1.get(0).getX()][path1.get(0).getY()] < 4 && self.getActionPoints() >= 6/* && !world.isVisible(self.getVisionRange() - 1, self.getX(), self.getY(), self.getStance(), localTargetX, localTargetY, TrooperStance.PRONE)*/) {
+                    if (goOnPath(self, path1.get(1).getX(), path1.get(1).getY(), false)) {
                         return;
                     }
                 }
@@ -1280,6 +1296,9 @@ public final class MyStrategy implements Strategy {
                     goToBonus = false;
                     move.setAction(ActionType.END_TURN);
                     return true;
+                } else if (bonusTarget != null && goToBonus && !goToSafePlace && !goThrowGrenade && pathOfTrooper.get(1).getX() == bonusTarget.getX() && pathOfTrooper.get(1).getY() == bonusTarget.getY()) {
+                    bonusTarget = null;
+                    goToBonus = false;
                 }
 
                 /*if (listOfEnemyTroopers.size() == 0 && !(targetX == localTargetX && targetY == localTargetY || targetX == globalTargetX && targetY == globalTargetY) && !goToBonus) {
@@ -2021,6 +2040,11 @@ public final class MyStrategy implements Strategy {
                         }
                     }
                 }
+                //поднимаю снайпера, чтобы он полз на коленях
+                if (self.getStance() == TrooperStance.PRONE) {
+                    move.setAction(ActionType.RAISE_STANCE);
+                    return true;
+                }
 
                 if (goOnPath(self, targetX, targetY, false)) {
                     return true;
@@ -2091,64 +2115,62 @@ public final class MyStrategy implements Strategy {
 
                 if (path != null && path.size() > 1 || path1 != null && path1.size() > 1) {
 
-                        if (path != null && path.size() < path1.size() + 5) {
+                    if (path != null && path.size() < path1.size() + 5) {
 
-                            if (path.size() > 4 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] > 2 && self.getActionPoints() >= 6) {
-                                if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), true)) {
-                                    return true;
-                                }
-                            }
-
-                            if (path.size() > 4 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] < 4 && self.getActionPoints() >= 6) {
-                                if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), true)) {
-                                    return true;
-                                }
-                            }
-
-                            if (path.size() > 1 && trueMapOfPoints[path.get(0).getX()][path.get(0).getY()] < 4 && self.getActionPoints() >= 6) {
-                                if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), true)) {
-                                    return true;
-                                }
-                            }
-
-                            if (self.getStance() != TrooperStance.PRONE) {
-                                move.setAction(ActionType.LOWER_STANCE);
+                        if (path.size() > 4 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] > 2 && self.getActionPoints() >= 6) {
+                            if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), true)) {
                                 return true;
                             }
+                        }
 
-                            move.setAction(ActionType.END_TURN);
-                            return true;
-
-                        } else {
-
-                            if (path.size() > 4 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] > 2 && self.getActionPoints() >= 6) {
-                                if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), false)) {
-                                    return true;
-                                }
-                            }
-
-                            if (path.size() > 4 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] < 4 && self.getActionPoints() >= 6) {
-                                if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), false)) {
-                                    return true;
-                                }
-                            }
-
-                            if (path.size() > 1 && trueMapOfPoints[path.get(0).getX()][path.get(0).getY()] < 4 && self.getActionPoints() >= 6) {
-                                if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), false)) {
-                                    return true;
-                                }
-                            }
-
-                            if (self.getStance() != TrooperStance.PRONE) {
-                                move.setAction(ActionType.LOWER_STANCE);
+                        if (path.size() > 4 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] < 4 && self.getActionPoints() >= 6) {
+                            if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), true)) {
                                 return true;
                             }
+                        }
 
-                            move.setAction(ActionType.END_TURN);
+                        if (path.size() > 1 && trueMapOfPoints[path.get(0).getX()][path.get(0).getY()] < 4 && self.getActionPoints() >= 6) {
+                            if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), true)) {
+                                return true;
+                            }
+                        }
+
+                        if (self.getStance() != TrooperStance.PRONE) {
+                            move.setAction(ActionType.LOWER_STANCE);
                             return true;
                         }
 
+                        move.setAction(ActionType.END_TURN);
+                        return true;
 
+                    } else {
+
+                        if (path.size() > 4 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] > 2 && self.getActionPoints() >= 6) {
+                            if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), false)) {
+                                return true;
+                            }
+                        }
+
+                        if (path.size() > 4 && trueMapOfPoints[path.get(1).getX()][path.get(1).getY()] < 4 && self.getActionPoints() >= 6) {
+                            if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), false)) {
+                                return true;
+                            }
+                        }
+
+                        if (path.size() > 1 && trueMapOfPoints[path.get(0).getX()][path.get(0).getY()] < 4 && self.getActionPoints() >= 6) {
+                            if (goOnPath(self, path.get(1).getX(), path.get(1).getY(), false)) {
+                                return true;
+                            }
+                        }
+
+                        if (self.getStance() != TrooperStance.PRONE) {
+                            move.setAction(ActionType.LOWER_STANCE);
+                            return true;
+                        }
+
+                        move.setAction(ActionType.END_TURN);
+                        return true;
+                    }
                 }
             }
 
@@ -2176,6 +2198,14 @@ public final class MyStrategy implements Strategy {
                     thePoint point = findCloseCell(self, targetX, targetY, false);
                     if (point != null && goOnPath(self, point.getX(), point.getY(), false)) {
                         return true;
+                    }
+                } else {
+                    for (Trooper trooper : troopers) {
+                        if (trooper.isTeammate() && trooper.getX() == targetX && trooper.getY() == targetY && self.getActionPoints() >= 4) {
+                            if (goOnPath(self, targetX, targetY, false)) {
+                                return true;
+                            }
+                        }
                     }
                 }
             }
