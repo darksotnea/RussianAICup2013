@@ -5020,7 +5020,25 @@ public final class MyStrategy implements Strategy {
                 }
 
             } else {
-                if(self.getActionPoints() >= game.getStanceChangeCost() && self.getStance() != safeStance) {
+
+                int goSafePoint = 0;
+                if (safeStance == TrooperStance.STANDING) {
+                    goSafePoint = 0;
+                } else if (safeStance == TrooperStance.KNEELING) {
+                    goSafePoint = 2;
+                } else if (safeStance == TrooperStance.PRONE) {
+                    goSafePoint = 4;
+                }
+
+                LinkedList<thePoint> tempPath = lee(self, self.getX(), self.getY(), point.getX(), point.getY(), true);
+                if ((tempPath == null || tempPath.size() < 2) && self.getActionPoints() >= 4 + goSafePoint || tempPath!= null && tempPath.size() > 1 && self.getActionPoints() - (tempPath.size() - 1) * 2 - 4 >= 0) {
+                    goToSafePlace = false;
+                    if (goOnPath(self, target.getX(), target.getY(), true)) {
+                        return true;
+                    }
+                }
+
+                if (self.getStance() != TrooperStance.PRONE && self.getActionPoints() >= game.getStanceChangeCost()) {
                     move.setAction(ActionType.LOWER_STANCE);
                     if (self.getStance() == TrooperStance.STANDING && safeStance == TrooperStance.KNEELING || self.getStance() == TrooperStance.KNEELING && safeStance == TrooperStance.PRONE) {
                         safePoint = null;
@@ -5030,6 +5048,17 @@ public final class MyStrategy implements Strategy {
                     }
                     return true;
                 }
+
+                /*if(self.getActionPoints() >= game.getStanceChangeCost() && self.getStance() != safeStance) {
+                    move.setAction(ActionType.LOWER_STANCE);
+                    if (self.getStance() == TrooperStance.STANDING && safeStance == TrooperStance.KNEELING || self.getStance() == TrooperStance.KNEELING && safeStance == TrooperStance.PRONE) {
+                        safePoint = null;
+                        goToSafePlace = false;
+                        idOfTrooperStop = (int) self.getId();
+                        saveMoveSafePlace = world.getMoveIndex();
+                    }
+                    return true;
+                }*/
                 move.setAction(ActionType.END_TURN);
                 return true;
             }
@@ -5868,7 +5897,13 @@ public final class MyStrategy implements Strategy {
 
     boolean testOnTrueMap(Trooper self, LinkedList<MyStrategy.thePoint> path1) {
         if (self.getActionPoints() < (clearSelfArea(self, 1) ? game.getStandingMoveCost() * 3 : game.getStandingMoveCost() * 4)) {
+
             if (trueMapOfPoints[self.getX()][self.getY()] < 4) {
+
+                if (path1 != null && path1.size() > 1 && trueMapOfPoints[path1.get(1).getX()][path1.get(1).getY()] > 2) {
+                    return false;
+                }
+
                 if (complatedPathOfTrooper != null && complatedPathOfTrooper.size() != 0 && trueMapOfPoints[complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getX()][complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getY()] > 4) {
                     move.setAction(ActionType.MOVE);
                     move.setX(complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 1).getX());
