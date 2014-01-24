@@ -1550,6 +1550,8 @@ public final class MyStrategy implements Strategy {
                 }
                 if(!flag) {
                     isVisibleForEnemys = true;
+                } else {
+                    isVisibleForEnemys = false;
                 }
             }
 
@@ -1800,7 +1802,7 @@ public final class MyStrategy implements Strategy {
 
                     thePoint point = null;
 
-                    if (self.getDistanceTo(targetTrooper) + 7 < path1.size()) {
+                    if (self.getDistanceTo(targetTrooper) <= self.getShootingRange() ? true : self.getDistanceTo(targetTrooper) + 5 < path1.size()) {
                         point = findClosestPointForEnemyTroopers(self, targetTrooper);
                     }
 
@@ -4379,6 +4381,15 @@ public final class MyStrategy implements Strategy {
             localTargetY = 100;
             beginBattle = false;
             detectEnemyByTeam = false;
+            for (Trooper trooper : troopers) {
+                if (trooper.isTeammate()) {
+                    LinkedList<thePoint> path = lee(self, self.getX(), self.getY(), trooper.getX(), trooper.getY(), false);
+                    if (path != null && path.size() > 1 && path.size() > 8) {
+                        localTargetX = trooper.getX();
+                        localTargetY = trooper.getY();
+                    }
+                }
+            }
         }
 
         if (targetTrooper != null) {
@@ -5128,7 +5139,7 @@ public final class MyStrategy implements Strategy {
         //если враг видень или досягаем для стрельбы, то идти как обычно, если юнит не видит никого, то отходить
 
         boolean flag = false;
-        if(!(istroopersUnderAttack && trooperUnderAttack == self.getId())) {
+        if(istroopersUnderAttack && trooperUnderAttack == self.getId()) {
             for (Trooper trooper : listOfEnemyTroopers) {
                 if (!trooper.isTeammate() && (canSeeOrCanShoot(self, trooper, true) || canSeeOrCanShoot(self, trooper, false))) {
                     flag = true;
