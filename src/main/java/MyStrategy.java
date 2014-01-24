@@ -35,7 +35,7 @@ public final class MyStrategy implements Strategy {
     private static boolean getHelpFromAir = false;
     private static boolean needHelpFromAir = false;
     private static boolean istroopersUnderAttack = false;
-    private static int trooperUnderAttack;
+    private static int trooperUnderAttack = -1;
     private static int numOfTroopers = 0;
     private static int teamSupportCount;
     private int indexOfCommander;
@@ -307,6 +307,19 @@ public final class MyStrategy implements Strategy {
 
         if (!(saveMoveWorld == world.getMoveIndex() || saveMoveWorld == world.getMoveIndex() - 1)) {
             istroopersUnderAttack = false;
+            trooperUnderAttack = -1;
+        }
+
+        if (trooperUnderAttack != -1) {
+            boolean test = false;
+            for (Trooper trooper : troopers) {
+                if (trooperUnderAttack == trooper.getId()) {
+                    test = true;
+                }
+            }
+            if (!test) {
+                trooperUnderAttack = -1;
+            }
         }
 
         if (goToSafePlace) {
@@ -1055,6 +1068,8 @@ public final class MyStrategy implements Strategy {
             if (self.getDistanceTo(localTargetX, localTargetY) <= 3 && world.isVisible(self.getVisionRange(), self.getX(), self.getY(), self.getStance(), localTargetX, localTargetY, TrooperStance.PRONE)) {
                 detectEnemyByTeam = false;
             }
+
+            //TODO вставить здесь расчёт обхода ячейки при следующей =2 (в пути не должно быть в первых 2 клетках =2)
             if (enemyInAmbush && listOfEnemyTroopers.size() == 0 && targetY == localTargetY && targetX == localTargetX) {
                 LinkedList<thePoint> path = lee(self, self.getX(), self.getY(), localTargetX, localTargetY, true);
                 LinkedList<thePoint> path1 = lee(self, self.getX(), self.getY(), localTargetX, localTargetY, false);
@@ -1745,6 +1760,7 @@ public final class MyStrategy implements Strategy {
                 LinkedList<thePoint> path = lee(self, self.getX(), self.getY(), targetTrooper.getX(), targetTrooper.getY(), true);
                 LinkedList<thePoint> path1 = lee(self, self.getX(), self.getY(), targetTrooper.getX(), targetTrooper.getY(), false);
 
+                //TODO вставить здесь расчёт безопасной ячейки из которой можно выстрелить по одному из вражескиъ юнитов (путь не должен содержать в себе видимого для врагов отрезка, который нельзя пройти не остановившись в нём) )
                 if (path != null && path.size() > 1 || path1 != null && path1.size() > 1) {
 
                     thePoint point = null;
@@ -4534,9 +4550,16 @@ public final class MyStrategy implements Strategy {
                 localTargetX = point.getX();
                 localTargetY = point.getY();
             }
-        } else if (istroopersUnderAttack && trooperUnderAttack == self.getId() && listOfEnemyTroopers.size() != 0) {
+        } else if (istroopersUnderAttack && trooperUnderAttack != self.getId() && trooperUnderAttack != -1 && listOfEnemyTroopers.size() == 0) {
             if (self.getDistanceTo(localTargetX, localTargetY) <= 3) {
-                thePoint point = goToTheAllegedEnemy(troopers[trooperUnderAttack]);
+                Trooper troop = null;
+                for (Trooper trooper : troopers) {
+                    if (trooper.getId() == trooperUnderAttack) {
+                        troop = trooper;
+                        break;
+                    }
+                }
+                thePoint point = goToTheAllegedEnemy(troop);
                 point = testCellOnFree(point.getX(), point.getY());
                 if (point != null) {
                     localTargetX = point.getX();
@@ -4662,9 +4685,11 @@ public final class MyStrategy implements Strategy {
         thePoint point = null;
 
         LinkedList<Trooper> listTroopers = new LinkedList<Trooper>();
-        for (Trooper trooper : troopers) {
-            if (trooper.getType() != troopers[trooperUnderAttack].getType() && trooper.isTeammate()) {
-                listTroopers.add(trooper);
+        if(trooperUnderAttack != -1) {
+            for (Trooper trooper : troopers) {
+                if (trooper.getId() != trooperUnderAttack && trooper.isTeammate()) {
+                    listTroopers.add(trooper);
+                }
             }
         }
 
