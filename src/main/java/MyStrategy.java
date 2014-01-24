@@ -2559,6 +2559,23 @@ public final class MyStrategy implements Strategy {
     thePoint findNotAchievableTail(Trooper self, boolean seeOrShoot, int additionalRange) {
         //находит ячейку недосягаемую для чужих юнитов
         if(safeStance == null && !(istroopersUnderAttack && trooperUnderAttack == self.getId())) {
+
+            boolean positionIsSafe;
+            if ((self.getType() == TrooperType.COMMANDER || self.getType() == TrooperType.SCOUT) && complatedPathOfTrooper!= null && complatedPathOfTrooper.size() >= 3) { //TODO возможно сделать для всех
+                positionIsSafe = true;
+                for (Trooper trooper : listOfEnemyTroopers) {
+                    if (world.isVisible(trooper.getVisionRange() + additionalRange, trooper.getX(), trooper.getY(), TrooperStance.STANDING, complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 2).getX(), complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 2).getY(), /*self.getStance()*/ TrooperStance.STANDING)) {
+                        positionIsSafe = false;
+                        break;
+                    }
+                }
+                if (positionIsSafe) {
+                    goToSafePlace = true;
+                    safePoint = new thePoint(complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 2).getX(), complatedPathOfTrooper.get(complatedPathOfTrooper.size() - 2).getY());
+                    return safePoint;
+                }
+            }
+
             boolean positionIsSafe1 = true;
             boolean positionIsSafe2 = true;
 
@@ -5098,7 +5115,19 @@ public final class MyStrategy implements Strategy {
     boolean shootAndGoToSafePlace (Trooper self, Trooper target, boolean canSeeOrShoot) {
 
         thePoint point = null;
+
+        //если враг видень или досягаем для стрельбы, то идти как обычно, если юнит не видит никого, то отходить
+
+        boolean flag = false;
         if(!(istroopersUnderAttack && trooperUnderAttack == self.getId())) {
+            for (Trooper trooper : listOfEnemyTroopers) {
+                if (!trooper.isTeammate() && (canSeeOrCanShoot(self, trooper, true) || canSeeOrCanShoot(self, trooper, false))) {
+                    flag = true;
+                }
+            }
+        }
+
+        if(flag) {
             point = findNotAchievableTail(self, canSeeOrShoot, 0);
         } else {
             point = findNotAchievableTail(self, canSeeOrShoot, 3); //TODO попробовать и 2-4
