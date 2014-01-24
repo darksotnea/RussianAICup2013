@@ -1541,7 +1541,16 @@ public final class MyStrategy implements Strategy {
 
             //TODO сделать trooperUnderAttack списком, так как несколько юнитов могут быть под атакой!
             if(istroopersUnderAttack && trooperUnderAttack == self.getId()) {
-                isVisibleForEnemys = true;
+                //если расстояние до врага меньше видимости юнита, то идти как обычно, если юнит не видит никого, то отходить
+                boolean flag = false;
+                for (Trooper trooper : listOfEnemyTroopers) {
+                    if (!trooper.isTeammate() && self.getDistanceTo(trooper) <= self.getVisionRange() && world.isVisible(self.getVisionRange(), self.getX(), self.getY(), TrooperStance.STANDING, trooper.getX(), trooper.getY(), trooper.getStance())) {
+                        flag = true;
+                    }
+                }
+                if(!flag) {
+                    isVisibleForEnemys = true;
+                }
             }
 
             for (Trooper trooper : listOfEnemyTroopers) {
