@@ -2119,7 +2119,7 @@ public final class MyStrategy implements Strategy {
                 }
             }
 
-            if (detectEnemyByTeam && self.getActionPoints() >= game.getStanceChangeCost() && !world.isVisible(self.getVisionRange(), self.getX(), self.getY(), self.getStance(), localTargetX, localTargetY, TrooperStance.PRONE)) {
+            if (targetTrooper != null && detectEnemyByTeam && self.getActionPoints() >= game.getStanceChangeCost() && !world.isVisible(self.getVisionRange(), self.getX(), self.getY(), self.getStance(), localTargetX, localTargetY, TrooperStance.PRONE)) {
 
                 LinkedList<thePoint> path = lee(self, self.getX(), self.getY(), targetTrooper.getX(), targetTrooper.getY(), true);
                 LinkedList<thePoint> path1 = lee(self, self.getX(), self.getY(), targetTrooper.getX(), targetTrooper.getY(), false);
