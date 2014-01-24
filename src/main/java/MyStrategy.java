@@ -4787,7 +4787,7 @@ public final class MyStrategy implements Strategy {
 
         if (self.getHitpoints() < HP_WHEN_GO_MEDIC && self.getActionPoints() >= getCostMoveWithStance(self) && self.getType() != TrooperType.FIELD_MEDIC) {
 
-            if (indexOfMedic != -1 && self.getDistanceTo(troopers[indexOfMedic]) > 1) {
+            if (indexOfMedic != -1 && self.getDistanceTo(troopers[indexOfMedic]) > 1 && self.getType() != TrooperType.SNIPER) {
 
                 LinkedList<thePoint> path1 = lee(self, self.getX(), self.getY(), troopers[indexOfMedic].getX(), troopers[indexOfMedic].getY(), true);
                 LinkedList<thePoint> path2 = lee(self, self.getX(), self.getY(), troopers[indexOfMedic].getX(), troopers[indexOfMedic].getY(), false);
