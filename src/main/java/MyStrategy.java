@@ -2647,24 +2647,20 @@ public final class MyStrategy implements Strategy {
                 //если положение prone, то так как уже ищем позицию, значит нас уже видно и мы не в безопасности
                 if (self.getStance() == TrooperStance.PRONE) {
                     positionIsSafe2 = false;
-                    break;
                 }
 
                 //если положение kneeling
                 if (self.getActionPoints() < 2 || self.getStance() == TrooperStance.KNEELING && world.isVisible(trooper.getVisionRange() + additionalRange, trooper.getX(), trooper.getY(), TrooperStance.STANDING, self.getX(), self.getY(), TrooperStance.PRONE)) {
                     positionIsSafe2 = false;
-                    break;
                 }
 
                 //если положение standing
                 if(!(self.getActionPoints() >= 4 && !world.isVisible(trooper.getVisionRange() + additionalRange, trooper.getX(), trooper.getY(), TrooperStance.STANDING, self.getX(), self.getY(), TrooperStance.PRONE))) {
                     positionIsSafe2 = false;
-                    break;
                 }
 
                 if(!(self.getActionPoints() >= 2 && !world.isVisible(trooper.getVisionRange() + additionalRange, trooper.getX(), trooper.getY(), TrooperStance.STANDING, self.getX(), self.getY(), TrooperStance.KNEELING))) {
                     positionIsSafe1 = false;
-                    break;
                 }
             }
 
