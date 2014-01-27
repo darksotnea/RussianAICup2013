@@ -2719,7 +2719,7 @@ public final class MyStrategy implements Strategy {
             for (Trooper trooper : listOfEnemyTroopers) {
                 for (int k = 0; k < W; k++) {
                     for (int m = 0; m < H; m++) {
-                        if (trooper.getDistanceTo(k, m) <= trooper.getVisionRange() + additionalRange && cellsIntTemp[k][m] != WALL && world.isVisible(trooper.getVisionRange() + additionalRange, trooper.getX(), trooper.getY(), trooper.getStance(), k, m, self.getStance())) {
+                        if (trooper.getDistanceTo(k, m) <= trooper.getVisionRange() + additionalRange && cellsIntTemp[k][m] != WALL && world.isVisible(trooper.getVisionRange() + additionalRange, trooper.getX(), trooper.getY(), TrooperStance.STANDING, k, m, self.getStance())) {
                             cellsIntTemp[k][m] = WALL;
                         }
                     }
@@ -2729,7 +2729,7 @@ public final class MyStrategy implements Strategy {
             for (Trooper trooper : listOfEnemyTroopers) {
                 for (int k = 0; k < W; k++) {
                     for (int m = 0; m < H; m++) {
-                        if (trooper.getDistanceTo(k, m) <= trooper.getShootingRange() + additionalRange && cellsIntTemp[k][m] != WALL && world.isVisible(trooper.getShootingRange() + additionalRange, trooper.getX(), trooper.getY(), trooper.getStance(), k, m, self.getStance())) {
+                        if (trooper.getDistanceTo(k, m) <= trooper.getShootingRange() + additionalRange && cellsIntTemp[k][m] != WALL && world.isVisible(trooper.getShootingRange() + additionalRange, trooper.getX(), trooper.getY(), TrooperStance.STANDING, k, m, self.getStance())) {
                             cellsIntTemp[k][m] = WALL;
                         }
                     }
