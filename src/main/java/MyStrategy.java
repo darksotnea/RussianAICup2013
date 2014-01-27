@@ -2643,15 +2643,6 @@ public final class MyStrategy implements Strategy {
             boolean positionIsSafe2 = true;
 
             for (Trooper trooper : listOfEnemyTroopers) {
-                if (self.getActionPoints() >= 2 && self.getStance() == TrooperStance.STANDING && world.isVisible(trooper.getVisionRange() + additionalRange, trooper.getX(), trooper.getY(), TrooperStance.STANDING, self.getX(), self.getY(), TrooperStance.KNEELING)) {
-                    positionIsSafe1 = false;
-                    break;
-                } else if (self.getStance() != TrooperStance.STANDING) {
-                    positionIsSafe1 = false;
-                }
-            }
-
-            for (Trooper trooper : listOfEnemyTroopers) {
 
                 //если положение prone, то так как уже ищем позицию, значит нас уже видно и мы не в безопасности
                 if (self.getStance() == TrooperStance.PRONE) {
@@ -2666,11 +2657,13 @@ public final class MyStrategy implements Strategy {
                 }
 
                 //если положение standing
-                if (self.getActionPoints() < 2 || self.getStance() == TrooperStance.STANDING && world.isVisible(trooper.getVisionRange() + additionalRange, trooper.getX(), trooper.getY(), TrooperStance.STANDING, self.getX(), self.getY(), TrooperStance.PRONE)) {
+                if(!(self.getActionPoints() >= 4 && !world.isVisible(trooper.getVisionRange() + additionalRange, trooper.getX(), trooper.getY(), TrooperStance.STANDING, self.getX(), self.getY(), TrooperStance.PRONE))) {
                     positionIsSafe2 = false;
                     break;
-                } else if (self.getStance() == TrooperStance.STANDING && world.isVisible(trooper.getVisionRange() + additionalRange, trooper.getX(), trooper.getY(), TrooperStance.STANDING, self.getX(), self.getY(), TrooperStance.KNEELING)) {
-                    positionIsSafe2 = false;
+                }
+
+                if(!(self.getActionPoints() >= 2 && !world.isVisible(trooper.getVisionRange() + additionalRange, trooper.getX(), trooper.getY(), TrooperStance.STANDING, self.getX(), self.getY(), TrooperStance.KNEELING))) {
+                    positionIsSafe1 = false;
                     break;
                 }
             }
@@ -3245,10 +3238,24 @@ public final class MyStrategy implements Strategy {
                             }
                         }
 
-                        if (!isVisibleForEnemy && self.getStance() != targetHeal.getStance() && self.getActionPoints() >= game.getStanceChangeCost()) {
+                        if (/*safePoint == null && */!isVisibleForEnemy && self.getStance() != targetHeal.getStance() && self.getActionPoints() >= game.getStanceChangeCost()) {
                             move.setAction(ActionType.LOWER_STANCE);
                             return true;
                         } else {
+
+/*                            thePoint point = findNotAchievableTail(self, true, 0);
+
+                            if (point != null) {
+
+                                LinkedList<thePoint> tempPath = lee(self, self.getX(), self.getY(), point.getX(), point.getY(), true);
+                                if (tempPath != null && tempPath.size() > 1 && self.getActionPoints() >= 2) {
+                                    if (goOnPath(self, point.getX(), point.getY(), true)) {
+                                        return true;
+                                    }
+                                }
+
+                            }*/
+
                             if (self.getActionPoints() >= game.getStanceChangeCost() && self.getStance() != TrooperStance.PRONE) {
                                 move.setAction(ActionType.LOWER_STANCE);
                                 return true;
@@ -3441,6 +3448,16 @@ public final class MyStrategy implements Strategy {
             }
         }
         if (self.getActionPoints() >= game.getFieldMedicHealCost()) {
+            if (targetHeal != null && targetHeal.getType() == TrooperType.FIELD_MEDIC) {
+                if (self.getHitpoints() + 3 > HP_WHEN_HEAL) {
+                    targetHeal = null;
+                }
+            }
+            if (targetHeal != null && targetHeal.getType() != TrooperType.FIELD_MEDIC) {
+                if (self.getHitpoints() + 5 > HP_WHEN_HEAL) {
+                    targetHeal = null;
+                }
+            }
             move.setAction(ActionType.HEAL);
             move.setX(target.getX());
             move.setY(target.getY());
@@ -4140,6 +4157,7 @@ public final class MyStrategy implements Strategy {
                     if (gameUnit.trooper.getId() == target.getId()) {
                         if (target.getHitpoints() <= self.getDamage()) {
                             listOfSowEnemys.remove(gameUnit);
+                            break;
                         }
                     }
                 }
