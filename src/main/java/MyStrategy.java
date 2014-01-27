@@ -4826,17 +4826,36 @@ public final class MyStrategy implements Strategy {
                 }
             }
 
-            if (self.getX() <= testTrooper.getX()) {
-                x = self.getX() - (testTrooper.getX() - self.getX());
+            if (self.getX() < testTrooper.getX()) {
+                x = -8;
+            } else if (self.getX() > testTrooper.getX()) {
+                x = +8;
             } else {
-                x = self.getX() + (self.getX() - testTrooper.getX());
+                x = 0;
             }
 
-            if (self.getY() <= testTrooper.getY()) {
-                y = self.getY() - (testTrooper.getY() - self.getY());
+            if (self.getY() < testTrooper.getY()) {
+                y = -8;
+            } else if (self.getY() > testTrooper.getY()) {
+                y = +8;
             } else {
-                y = self.getY() + (self.getY() - testTrooper.getY());
+                y = 0;
             }
+
+            if (Math.abs(self.getX() - testTrooper.getX()) >= 3 && Math.abs(self.getY() - testTrooper.getY()) < 3) {
+                if (x > 0) {
+                    x -= 2;
+                } else if (x < 0) {
+                    x += 2;
+                }
+            } if (Math.abs(self.getX() - testTrooper.getX()) < 3 && Math.abs(self.getY() - testTrooper.getY()) >= 3) {
+                if (y > 0) {
+                    y -= 2;
+                } else if (y < 0) {
+                    y += 2;
+                }
+            }
+
             point = new thePoint(x, y);
         }
 
