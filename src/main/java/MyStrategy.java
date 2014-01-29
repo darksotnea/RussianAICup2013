@@ -699,6 +699,10 @@ public final class MyStrategy implements Strategy {
                     return;
                 }
 
+                if (self.getHitpoints() <= 65 && goToMedic(self)) {
+                    return;
+                }
+
                 if (beginBattle) {
                     if (conductTheWar(self)) {
                         return;
@@ -777,6 +781,10 @@ public final class MyStrategy implements Strategy {
                 }
 
                 if (tryToUseMedkit(self) && self.getStance() != TrooperStance.PRONE) {
+                    return;
+                }
+
+                if (self.getHitpoints() <= 65 && goToMedic(self)) {
                     return;
                 }
 
@@ -931,6 +939,10 @@ public final class MyStrategy implements Strategy {
                     return;
                 }
 
+                if (self.getHitpoints() <= 65 && goToMedic(self)) {
+                    return;
+                }
+
                 if (beginBattle) {
                     if (conductTheWar(self)) {
                         return;
@@ -1007,7 +1019,11 @@ public final class MyStrategy implements Strategy {
                     return;
                 }
 
-                if (goToMedic(self) && self.getStance() != TrooperStance.PRONE) {
+                if (tryToUseMedkit(self) && self.getStance() != TrooperStance.PRONE) {
+                    return;
+                }
+
+                if (self.getHitpoints() <= 65 && goToMedic(self)) {
                     return;
                 }
 
@@ -4747,6 +4763,10 @@ public final class MyStrategy implements Strategy {
     }
 
     boolean goToMedic(Trooper self) {
+
+        if (killAnyEnemyUnit(self)) {
+            return true;
+        }
 
         if (goAndKillTarget(self)) {
             return true;
