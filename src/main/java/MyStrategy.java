@@ -130,25 +130,16 @@ public final class MyStrategy implements Strategy {
             if (troopers[i].getType() == TrooperType.FIELD_MEDIC && troopers[i].isTeammate()) {
                 indexOfMedic = i;
                 teamCount++;
-                if (indexOfScout == -1 && indexOfCommander == -1 && indexOfSoldier == -1) {
-                    forwardTrooper = indexOfMedic;
-                }
             }
 
             if (troopers[i].getType() == TrooperType.COMMANDER && troopers[i].isTeammate()) {
                 indexOfCommander = i;
                 teamCount++;
-                if (indexOfScout == -1) {
-                    forwardTrooper = indexOfCommander;
-                }
             }
 
             if (troopers[i].getType() == TrooperType.SOLDIER && troopers[i].isTeammate()) {
                 indexOfSoldier = i;
                 teamCount++;
-                if (indexOfScout == -1 && indexOfCommander == -1) {
-                    forwardTrooper = indexOfSoldier;
-                }
             }
 
             if (troopers[i].getType() == TrooperType.SNIPER && troopers[i].isTeammate()) {
@@ -159,8 +150,17 @@ public final class MyStrategy implements Strategy {
             if (troopers[i].getType() == TrooperType.SCOUT && troopers[i].isTeammate()) {
                 indexOfScout = i;
                 teamCount++;
-                forwardTrooper = indexOfScout;
             }
+        }
+
+        if (indexOfScout != -1) {
+            forwardTrooper = indexOfScout;
+        } else if (indexOfCommander != -1) {
+            forwardTrooper = indexOfCommander;
+        } else if (indexOfSoldier != -1) {
+            forwardTrooper = indexOfSoldier;
+        } else if (indexOfMedic != -1) {
+            forwardTrooper = indexOfMedic;
         }
 
         if (lastTrooperType != self.getType() && teamCount > 1) {
@@ -1762,7 +1762,7 @@ public final class MyStrategy implements Strategy {
                     return true;
                 }
 
-                if (makeValidLowerStance(self, true)) {
+                 if (makeValidLowerStance(self, true)) {
                     return true;
                 }
 
@@ -4110,7 +4110,7 @@ public final class MyStrategy implements Strategy {
                     canShoot = false;
                 }
 
-                if (canShoot && self.getStance() != TrooperStance.PRONE && self.getDistanceTo(targetTrooper) <= self.getShootingRange() && ((self.getActionPoints() >= self.getShootCost() + game.getStanceChangeCost()) && inWar || (self.getActionPoints() >= game.getStanceChangeCost()) && !inWar)) {
+                if (canShoot && self.getStance() != TrooperStance.PRONE && self.getDistanceTo(targetTrooper) <= self.getShootingRange() && (( (self.getActionPoints() % self.getShootCost() >= 2 && self.getActionPoints() % self.getShootCost() < self.getShootCost()) ? self.getActionPoints() >= self.getShootCost() + game.getStanceChangeCost() : false) && inWar || (self.getActionPoints() >= game.getStanceChangeCost()) && !inWar)) {
                     move.setAction(ActionType.LOWER_STANCE);
                     return true;
                 }
@@ -4126,7 +4126,7 @@ public final class MyStrategy implements Strategy {
                             canShoot = false;
                         }
 
-                        if (canShoot && self.getStance() != TrooperStance.PRONE && self.getDistanceTo(trooper) <= self.getShootingRange() && ((self.getActionPoints() >= self.getShootCost() + game.getStanceChangeCost()) && inWar || (self.getActionPoints() >= game.getStanceChangeCost()) && !inWar)) {
+                        if (canShoot && self.getStance() != TrooperStance.PRONE && self.getDistanceTo(trooper) <= self.getShootingRange() && (( (self.getActionPoints() % self.getShootCost() >= 2 && self.getActionPoints() % self.getShootCost() < self.getShootCost()) ? self.getActionPoints() >= self.getShootCost() + game.getStanceChangeCost() : false) && inWar || (self.getActionPoints() >= game.getStanceChangeCost()) && !inWar)) {
                             move.setAction(ActionType.LOWER_STANCE);
                             return true;
                         }
@@ -4142,7 +4142,7 @@ public final class MyStrategy implements Strategy {
                             canShoot = false;
                         }
 
-                        if (canShoot && self.getStance() != TrooperStance.PRONE && self.getDistanceTo(localTargetX, localTargetY) <= self.getShootingRange() + 1 && self.getActionPoints() >= self.getShootCost() + game.getStanceChangeCost()) {
+                        if (canShoot && self.getStance() != TrooperStance.PRONE && self.getDistanceTo(localTargetX, localTargetY) <= self.getShootingRange() + 1 && ( (self.getActionPoints() % self.getShootCost() >= 2 && self.getActionPoints() % self.getShootCost() < self.getShootCost()) ? self.getActionPoints() >= self.getShootCost() + game.getStanceChangeCost() : false)) {
                             move.setAction(ActionType.LOWER_STANCE);
                             return true;
                         }
