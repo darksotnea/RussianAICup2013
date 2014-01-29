@@ -2066,7 +2066,7 @@ public final class MyStrategy implements Strategy {
                         }
 
                         LinkedList<thePoint> pathTemp = lee(self, self.getX(), self.getY(), bonus.getX(), bonus.getY(), true);
-                        if (pathTemp != null && pathTemp.size() > 4 || forwardTrooper != -1 && troopers[forwardTrooper].getDistanceTo(bonus) > 3 || self.getActionPoints() < 4) {
+                        if (pathTemp != null && pathTemp.size() > 4 && forwardTrooper == -1 || pathTemp != null && pathTemp.size() > 4 && forwardTrooper != -1 && troopers[forwardTrooper].getDistanceTo(bonus) > 3 || self.getActionPoints() < 4) {
                             isGoToBonus = false;
                         }
 
@@ -2342,7 +2342,7 @@ public final class MyStrategy implements Strategy {
                 for (int k = 0; k < W; k++) {
                     for (int m = 0; m < H; m++) {
                         LinkedList<thePoint> path = lee(self, self.getX(), self.getY(), k, m, true);
-                        if (cellsIntTemp[k][m] == BLANK && path != null && path.size() > 1 && path.size() - 1 < moveLen && getDistancePointToPoint(k, m, target.getX(), target.getY()) <= self.getShootingRange() && getDistancePointToPoint(k, m, target.getX(), target.getY()) < targetDistance) {
+                        if (cellsIntTemp[k][m] == BLANK && path != null && path.size() > 1 && getDistancePointToPoint(k, m, target.getX(), target.getY()) <= self.getShootingRange() && getDistancePointToPoint(k, m, target.getX(), target.getY()) <= targetDistance) {
 
                             for (Trooper trooper1 : troopers) {
                                 if (trooper1.getX() == k && trooper1.getY() == m) {
@@ -2361,7 +2361,7 @@ public final class MyStrategy implements Strategy {
 
                             LinkedList<thePoint> tempPath = lee(self, self.getX(), self.getY(), k, m, true);
 
-                            if (tempPath != null && tempPath.size() > 1 && tempPath.size() - 1 < moveLen) {
+                            if (tempPath != null && tempPath.size() > 1 && tempPath.size() - 1 <= moveLen) {
                                 moveLen = tempPath.size() - 1;
                                 targetDistance = getDistancePointToPoint(k, m, target.getX(), target.getY());
                                 x1 = k;
@@ -2790,7 +2790,7 @@ public final class MyStrategy implements Strategy {
                 LinkedList<thePoint> path = lee(self, self.getX(), self.getY(), k, m, true);
 
 
-                if (isNotStoredCell && cellsIntTemp[k][m] == BLANK && path != null && path.size() > 1 && path.size() - 1 < moveLen && self.getDistanceTo(teamTrooper) < distTeam) {
+                if (isNotStoredCell && cellsIntTemp[k][m] == BLANK && path != null && path.size() > 1 && self.getDistanceTo(teamTrooper) <= distTeam) {
 
                     for (Trooper trooper : troopers) {
                         if (trooper.getX() == k && trooper.getY() == m) {
@@ -2798,7 +2798,7 @@ public final class MyStrategy implements Strategy {
                             break;
                         }
                     }
-                    if (path != null) {
+                    if (path != null && path.size() - 1 <= moveLen) {
                         moveLen = path.size() - 1;
                         x1 = k;
                         y1 = m;
@@ -5344,6 +5344,7 @@ public final class MyStrategy implements Strategy {
                 LinkedList<thePoint> tempPath = lee(self, self.getX(), self.getY(), point.getX(), point.getY(), true);
                 if ((tempPath == null || tempPath.size() < 2) && self.getActionPoints() >= 4 + goSafePoint || tempPath!= null && tempPath.size() > 1 && self.getActionPoints() - (tempPath.size() - 1) * 2 - 4 >= 0) {
                     goToSafePlace = false;
+                    safePoint = null;
                     if (goOnPath(self, target.getX(), target.getY(), true)) {
                         return true;
                     }
@@ -5374,6 +5375,7 @@ public final class MyStrategy implements Strategy {
                 LinkedList<thePoint> tempPath = lee(self, self.getX(), self.getY(), point.getX(), point.getY(), true);
                 if ((tempPath == null || tempPath.size() < 2) && self.getActionPoints() >= 4 + goSafePoint || tempPath!= null && tempPath.size() > 1 && self.getActionPoints() - (tempPath.size() - 1) * 2 - 4 >= 0) {
                     goToSafePlace = false;
+                    safePoint = null;
                     if (goOnPath(self, target.getX(), target.getY(), true)) {
                         return true;
                     }
