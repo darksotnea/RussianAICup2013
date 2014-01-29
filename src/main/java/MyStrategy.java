@@ -1454,13 +1454,17 @@ public final class MyStrategy implements Strategy {
                 return true;
             }
 
-            if (targetHeal == null) {
+            if (goAndKillTarget(self)) {
+                return true;
+            }
+
+            /*if (targetHeal == null) {*/
                 if (indexOfSniper != -1 && self.getDistanceTo(troopers[indexOfSniper]) > 3) {
 
                     for (Trooper trooper : listOfEnemyTroopers) {
 
                         if (canSeeOrCanShoot(self, trooper, false)) {
-                            if (troopers[indexOfSniper].getHitpoints() <= 30) {
+                            if (troopers[indexOfSniper].getHitpoints() <= 50) {
                                 targetHeal = troopers[indexOfSniper];
                                 if (goOnPath(self, troopers[indexOfSniper].getX(), troopers[indexOfSniper].getY(), false)) {
                                     return true;
@@ -1473,7 +1477,7 @@ public final class MyStrategy implements Strategy {
                 } else if (indexOfSniper == -1 && indexOfSoldier != -1 && self.getDistanceTo(troopers[indexOfSoldier]) > 2) {
                     for (Trooper trooper : listOfEnemyTroopers) {
                         if (canSeeOrCanShoot(self, trooper, false)) {
-                            if (troopers[indexOfSoldier].getHitpoints() <= 30) {
+                            if (troopers[indexOfSoldier].getHitpoints() <= 50) {
                                 targetHeal = troopers[indexOfSoldier];
                                 if (goOnPath(self, troopers[indexOfSoldier].getX(), troopers[indexOfSoldier].getY(), false)) {
                                     return true;
@@ -1484,7 +1488,7 @@ public final class MyStrategy implements Strategy {
                 } else if (indexOfSniper == -1 && indexOfSoldier == -1 && indexOfCommander != -1 && self.getDistanceTo(troopers[indexOfCommander]) > 2) {
                     for (Trooper trooper : listOfEnemyTroopers) {
                         if (canSeeOrCanShoot(self, trooper, false)) {
-                            if (troopers[indexOfCommander].getHitpoints() <= 30) {
+                            if (troopers[indexOfCommander].getHitpoints() <= 50) {
                                 targetHeal = troopers[indexOfCommander];
                                 if (goOnPath(self, troopers[indexOfCommander].getX(), troopers[indexOfCommander].getY(), false)) {
                                     return true;
@@ -1493,7 +1497,7 @@ public final class MyStrategy implements Strategy {
                         }
                     }
                 }
-            }
+            /*}*/
         }
 
         //управление снайпером, чтобы не лез на передовую при живых командире и солдате
