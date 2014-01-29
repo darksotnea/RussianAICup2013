@@ -2342,7 +2342,7 @@ public final class MyStrategy implements Strategy {
                 for (int k = 0; k < W; k++) {
                     for (int m = 0; m < H; m++) {
                         LinkedList<thePoint> path = lee(self, self.getX(), self.getY(), k, m, true);
-                        if (cellsIntTemp[k][m] == BLANK && path != null && path.size() > 1 && getDistancePointToPoint(k, m, target.getX(), target.getY()) <= self.getShootingRange() && getDistancePointToPoint(k, m, target.getX(), target.getY()) <= targetDistance) {
+                        if (cellsIntTemp[k][m] == BLANK && path != null && path.size() > 1 && getDistancePointToPoint(k, m, target.getX(), target.getY()) <= self.getShootingRange() && getDistancePointToPoint(k, m, target.getX(), target.getY()) <= targetDistance && world.isVisible(self.getShootingRange(), k, m, TrooperStance.STANDING, trooper.getX(), trooper.getY(), trooper.getStance())) {
 
                             for (Trooper trooper1 : troopers) {
                                 if (trooper1.getX() == k && trooper1.getY() == m) {
