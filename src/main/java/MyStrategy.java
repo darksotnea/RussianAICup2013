@@ -4655,7 +4655,7 @@ public final class MyStrategy implements Strategy {
                             gameUnit.trooper = new Trooper(gameUnit.trooper.getId(), gameUnit.trooper.getX(), gameUnit.trooper.getY(), gameUnit.trooper.getPlayerId(), gameUnit.trooper.getTeammateIndex(), gameUnit.trooper.isTeammate(), gameUnit.trooper.getType(), gameUnit.trooper.getStance(), gameUnit.trooper.getHitpoints() - self.getDamage(), gameUnit.trooper.getMaximalHitpoints(), gameUnit.trooper.getActionPoints(), gameUnit.trooper.getInitialActionPoints(), gameUnit.trooper.getVisionRange(), gameUnit.trooper.getShootingRange(), gameUnit.trooper.getShootCost(), gameUnit.trooper.getStandingDamage(), gameUnit.trooper.getKneelingDamage(), gameUnit.trooper.getProneDamage(), gameUnit.trooper.getDamage(), gameUnit.trooper.isHoldingGrenade(), gameUnit.trooper.isHoldingMedikit(), gameUnit.trooper.isHoldingFieldRation());
                             break;
                         } else {
-                            gameUnit.trooper = new Trooper(gameUnit.trooper.getId(), gameUnit.trooper.getX(), gameUnit.trooper.getY(), gameUnit.trooper.getPlayerId(), gameUnit.trooper.getTeammateIndex(), gameUnit.trooper.isTeammate(), gameUnit.trooper.getType(), gameUnit.trooper.getStance(), gameUnit.trooper.getInitialActionPoints(), gameUnit.trooper.getMaximalHitpoints(), gameUnit.trooper.getActionPoints(), gameUnit.trooper.getInitialActionPoints(), gameUnit.trooper.getVisionRange(), gameUnit.trooper.getShootingRange(), gameUnit.trooper.getShootCost(), gameUnit.trooper.getStandingDamage(), gameUnit.trooper.getKneelingDamage(), gameUnit.trooper.getProneDamage(), gameUnit.trooper.getDamage(), gameUnit.trooper.isHoldingGrenade(), gameUnit.trooper.isHoldingMedikit(), gameUnit.trooper.isHoldingFieldRation());
+                            gameUnit.trooper = new Trooper(gameUnit.trooper.getId(), gameUnit.trooper.getX(), gameUnit.trooper.getY(), gameUnit.trooper.getPlayerId(), gameUnit.trooper.getTeammateIndex(), gameUnit.trooper.isTeammate(), gameUnit.trooper.getType(), gameUnit.trooper.getStance(), 100, gameUnit.trooper.getMaximalHitpoints(), gameUnit.trooper.getActionPoints(), gameUnit.trooper.getInitialActionPoints(), gameUnit.trooper.getVisionRange(), gameUnit.trooper.getShootingRange(), gameUnit.trooper.getShootCost(), gameUnit.trooper.getStandingDamage(), gameUnit.trooper.getKneelingDamage(), gameUnit.trooper.getProneDamage(), gameUnit.trooper.getDamage(), gameUnit.trooper.isHoldingGrenade(), gameUnit.trooper.isHoldingMedikit(), gameUnit.trooper.isHoldingFieldRation());
                             break;
                         }
                     }
@@ -6755,6 +6755,18 @@ public final class MyStrategy implements Strategy {
 
             }
 
+        } else if (self.getType() == TrooperType.SNIPER && self.getActionPoints() < self.getShootCost()) {
+
+            if (self.getDistanceTo(target) <= self.getShootingRange() + 1 && self.getStance() == TrooperStance.STANDING && world.isVisible(self.getShootingRange() + 1, self.getX(), self.getY(), TrooperStance.KNEELING, target.getX(), target.getY(), target.getStance()) || self.getDistanceTo(target) <= self.getShootingRange() + 1 && self.getStance() == TrooperStance.KNEELING && world.isVisible(self.getShootingRange() + 1, self.getX(), self.getY(), TrooperStance.PRONE, target.getX(), target.getY(), target.getStance())) {
+                move.setAction(ActionType.LOWER_STANCE);
+                return true;
+            } else if (self.getDistanceTo(target) <= self.getShootingRange() + 2 && self.getStance() == TrooperStance.STANDING && self.getActionPoints() >= 4) {
+
+                if (world.isVisible(self.getShootingRange() + 2, self.getX(), self.getY(), TrooperStance.PRONE, target.getX(), target.getY(), target.getStance())) {
+                    move.setAction(ActionType.LOWER_STANCE);
+                    return true;
+                }
+            }
         }
 
         return false;
