@@ -1825,7 +1825,15 @@ public final class MyStrategy implements Strategy {
                 LinkedList<thePoint> path = lee(self, self.getX(), self.getY(), targetTrooper.getX(), targetTrooper.getY(), true);
                 LinkedList<thePoint> path1 = lee(self, self.getX(), self.getY(), targetTrooper.getX(), targetTrooper.getY(), false);
 
-                //TODO вставить здесь расчёт безопасной ячейки из которой можно выстрелить по одному из вражескиъ юнитов (путь не должен содержать в себе видимого для врагов отрезка, который нельзя пройти не остановившись в нём) )
+                //расчёт безопасной ячейки из которой можно выстрелить по одному из вражеских юнитов (путь не должен содержать в себе видимого для врагов отрезка, который нельзя пройти не остановившись в нём)
+                thePoint pointOfWar = findPointForAttackEnemyTroopers(self);
+                if (pointOfWar != null) {
+                    LinkedList<thePoint> path3 = lee(self, self.getX(), self.getY(), pointOfWar.getX(), pointOfWar.getY(), true);
+                    if (path3 != null && goOnPath(self, pointOfWar.getX(), pointOfWar.getY(), true)) {
+                        return true;
+                    }
+                }
+
                 if (path != null && path.size() > 1 || path1 != null && path1.size() > 1) {
 
                     thePoint point = null;
@@ -2364,7 +2372,6 @@ public final class MyStrategy implements Strategy {
         int x1 = -1;
         int y1 = -1;
 
-
         for(Trooper trooper : listOfEnemyTroopers) {
             if (!trooper.isTeammate() && trooper == target) {
 
@@ -2407,6 +2414,109 @@ public final class MyStrategy implements Strategy {
             return new thePoint(x1, y1);
         } else {
             return null;  // безопасная ячейка не найдена
+        }
+    }
+
+    //расчёт безопасной ячейки из которой можно выстрелить по одному из вражескиъ юнитов (путь не должен содержать в себе видимого для врагов отрезка, который нельзя пройти не остановившись в нём)
+    private thePoint findPointForAttackEnemyTroopers(Trooper self) {
+        int W = world.getWidth();
+        int H = world.getHeight();
+        int WALL = -1;                // непроходимая ячейка
+        int BLANK = -2;                // свободная непомеченная ячейка
+
+        int[][] cellsIntTemp = new int[W][];
+        for (int i = 0; i < W; i++) {
+            cellsIntTemp[i] = Arrays.copyOf(cellsInt[i], cellsInt[i].length);
+        }
+
+        int goUpStance = 0;
+        int actionPoints = self.getActionPoints();
+
+        if (self.getStance() == TrooperStance.PRONE) {
+            goUpStance = 4;
+        } else if (self.getStance() == TrooperStance.KNEELING) {
+            goUpStance = 2;
+        } else if (self.getStance() == TrooperStance.STANDING) {
+            goUpStance = 0;
+        }
+        actionPoints -= goUpStance;
+
+        int moveLen = actionPoints / game.getStandingMoveCost() + 1; //+1 для расчёта ниже tempPath.size() - 1 < moveLen, чтобы не ставить <=
+        int moveLen1 = 50;
+
+        int x1 = -1;
+        int y1 = -1;
+
+        for(Trooper trooper : listOfEnemyTroopers) {
+            if (!trooper.isTeammate()) {
+                for (int k = 0; k < W; k++) {
+                    for (int m = 0; m < H; m++) {
+
+                        LinkedList<thePoint> path = leeGoOn(self, self.getX(), self.getY(), k, m, true);
+                        if (cellsIntTemp[k][m] == BLANK && path != null && path.size() > 1 && getDistancePointToPoint(k, m, trooper.getX(), trooper.getY()) <= self.getShootingRange()) {
+                            if(world.isVisible(self.getShootingRange(), k, m, TrooperStance.STANDING, trooper.getX(), trooper.getY(), ((self.getType() == TrooperType.FIELD_MEDIC || self.getType() == TrooperType.COMMANDER || self.getType() == TrooperType.SCOUT) ? trooper.getStance() : TrooperStance.PRONE ))) {
+
+                                for (Trooper trooper1 : troopers) {
+                                    if (trooper1.getX() == k && trooper1.getY() == m) {
+                                        continue;
+                                    }
+                                }
+
+                                int test = 0;
+                                for (thePoint point : path) {
+                                    for (Trooper trooper1 : listOfEnemyTroopers) {
+                                        if (!world.isVisible(trooper1.getVisionRange(), trooper1.getX(), trooper1.getY(), TrooperStance.STANDING, k, m, TrooperStance.PRONE)) {
+                                            test = 0;
+                                        } else {
+                                            test++;
+                                            break;
+                                        }
+                                        if (test > moveLen - 2) {
+                                            break;
+                                        }
+                                    }
+                                    if (test > moveLen - 2) {
+                                        break;
+                                    }
+                                }
+
+                                if (test > moveLen - 2) {
+                                    continue;
+                                }
+
+                                for (Trooper trooper1 : listOfEnemyTroopers) {
+                                    if (!world.isVisible(trooper1.getVisionRange(), trooper1.getX(), trooper1.getY(), TrooperStance.STANDING, k, m, TrooperStance.STANDING) || !world.isVisible(trooper1.getVisionRange(), trooper1.getX(), trooper1.getY(), TrooperStance.STANDING, k, m, TrooperStance.KNEELING) && moveLen - 1 >= 0 || !world.isVisible(trooper1.getVisionRange(), trooper1.getX(), trooper1.getY(), TrooperStance.STANDING, k, m, TrooperStance.PRONE) && moveLen - 2 >= 0) {
+                                        //если попали сюда, значит можно спрятаться от вражеского юнита в одной из позиций
+                                    } else {
+                                        //если попали сюда, значит мой юнит в этой точке виден врагу и переходим к следующей
+                                        continue;
+                                    }
+                                }
+
+                                if (path != null && path.size() > 1 && path.size() - 1 <= moveLen1 && actionPoints - moveLen1 - 2 < 0) {
+                                    moveLen1 = path.size() - 1;
+                                    x1 = k;
+                                    y1 = m;
+                                }
+
+                                if (path != null && path.size() > 1 && path.size() - 1 <= moveLen) {
+                                    moveLen = path.size() - 1;
+                                    x1 = k;
+                                    y1 = m;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (x1 != -1 && y1 != -1 && moveLen != 50) {
+            return new thePoint(x1, y1);
+        } else if (x1 != -1 && y1 != -1 && moveLen1 != 50) {
+            return new thePoint(x1, y1);
+        } else {
+            return null;
         }
     }
 
@@ -3114,6 +3224,110 @@ public final class MyStrategy implements Strategy {
         pathTemp.addFirst(new thePoint(ax, ay));                  // теперь px[0..len] и py[0..len] - координаты ячеек пути
 
         return pathTemp;
+    }
+
+    LinkedList<thePoint> leeGoOn(Trooper self, int ax, int ay, int bx, int by, boolean isWithTroopers) {    // поиск пути из ячейки (ax, ay) в ячейку (bx, by)
+        int W = world.getWidth();
+        int H = world.getHeight();
+        int WALL = -1;                // непроходимая ячейка
+        int BLANK = -2;                // свободная непомеченная ячейка
+
+        int[][] cellsIntTemp = new int[W][];
+        for (int i = 0; i < W; i++) {
+            cellsIntTemp[i] = Arrays.copyOf(cellsInt[i], cellsInt[i].length);
+        }
+
+        LinkedList<thePoint> pathTemp = new LinkedList<>();
+
+        int len;                        // длина пути
+
+        int[] dx = {1, 0, -1, 0};           //смещения, соответствующие соседям ячейки
+        int[] dy = {0, 1, 0, -1};           //справа, снизу, слева и сверху
+
+        int d, x, y, i;
+        boolean stop;
+
+        for (int i1 = 3; i1 >= 0; i1--) {
+            int j1 = (int) (Math.random() * 4);
+            int temp = dx[i1];
+            dx[i1] = dx[j1];
+            dx[j1] = temp;
+            temp = dy[i1];
+            dy[i1] = dy[j1];
+            dy[j1] = temp;
+        }
+
+        if (isWithTroopers) {
+            for (Trooper troop : troopers) {
+                if (troop.getX() == bx && troop.getY() == by) {
+                    return null;
+                } else {
+                    if (!(self.getType() == troop.getType() && troop.isTeammate())) {
+                        cellsIntTemp[troop.getX()][troop.getY()] = WALL;
+                    }
+                }
+            }
+        }
+
+        // распространение волны
+        d = 0;
+        cellsIntTemp[ax][ay] = 0;               // стартовая ячейка помечена 0
+        do {
+            stop = true;                        // предполагаем, что все свободные клетки уже помечены
+            for (x = 0; x < W; ++x) {
+                for (y = 0; y < H; ++y) {
+                    if (cellsIntTemp[x][y] == d) {                                                 // ячейка (x, y) помечена числом d
+                        for (i = 0; i < 4; ++i) {                                                  // проходим по всем непомеченным соседям
+                            if (x + dx[i] >= 0 && x + dx[i] < W && y + dy[i] >= 0 && y + dy[i] < H) {
+                                if (cellsIntTemp[x + dx[i]][y + dy[i]] == BLANK) {
+                                    stop = false;                                      // найдены непомеченные клетки
+                                    cellsIntTemp[x + dx[i]][y + dy[i]] = d + 1;        // распространяем волну
+                                }
+                            } else {
+                                stop = false;
+                            }
+                        }
+                    }
+                }
+            }
+            d++;
+        } while (!stop && cellsIntTemp[bx][by] == BLANK);
+
+        if (cellsIntTemp[bx][by] == BLANK) {
+            return null;  // путь не найден
+        }
+
+        // восстановление пути
+        len = cellsIntTemp[bx][by];              // длина кратчайшего пути из (ax, ay) в (bx, by)
+        x = bx;
+        y = by;
+        d = len;
+
+        while (d > 0) {
+            int costCell = 0;
+            pathTemp.addFirst(new thePoint(x, y));                   // записываем ячейку (x, y) в путь
+            d--;
+            int x1 = -1, y1 = -1;
+            for (i = 0; i < 4; ++i) {
+                if (x + dx[i] >= 0 && x + dx[i] < W && y + dy[i] >= 0 && y + dy[i] < H) {
+                    if (cellsIntTemp[x + dx[i]][y + dy[i]] == d && trueMapOfPoints[x + dx[i]][y + dy[i]] >= costCell) {
+                        x1 = x + dx[i];
+                        y1 = y + dy[i];                          // переходим в ячейку, которая на 1 ближе к старту
+                        costCell = trueMapOfPoints[x][y];
+                    }
+                }
+            }
+            x = x1;
+            y = y1;
+        }
+
+        pathTemp.addFirst(new thePoint(ax, ay));                  // теперь px[0..len] и py[0..len] - координаты ячеек пути
+
+        if(pathTemp != null && pathTemp.size() > 1) {
+            return pathTemp;
+        } else {
+            return null;
+        }
     }
 
     boolean isDistanceEqualOrLessOneTail(Trooper self, Trooper target) {
@@ -4684,7 +4898,7 @@ public final class MyStrategy implements Strategy {
             }
         }
 
-        for (Trooper trooper : listOfEnemyTroopers) {                                                                                                                                                                                       //TODO возможно убрать -2, попробовать.
+        for (Trooper trooper : listOfEnemyTroopers) {
             if ((trooper.getHitpoints() % self.getDamage(self.getStance()) == 0 ? trooper.getHitpoints() / self.getDamage(self.getStance()) : trooper.getHitpoints() / self.getDamage(self.getStance()) + 1) <= actionPoint / self.getShootCost()/* - 2*/) {
                 if (testMoveUpAttack(self, trooper)) {
                     return true;
@@ -4714,7 +4928,7 @@ public final class MyStrategy implements Strategy {
             }
         }
 
-        for (Trooper trooper : listOfEnemyTroopers) {                                                                                                                                                                                          //TODO возможно убрать -2, попробовать.
+        for (Trooper trooper : listOfEnemyTroopers) {
             if ((trooper.getHitpoints() % self.getDamage(self.getStance()) == 0 ? trooper.getHitpoints() / self.getDamage(self.getStance()) : trooper.getHitpoints() / self.getDamage(self.getStance()) + 1) <= actionPoint / self.getShootCost()/* - 2*/) {
                 if (testMoveUpAttack(self, trooper)) {
                     return true;
