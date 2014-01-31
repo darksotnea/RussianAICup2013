@@ -6757,7 +6757,7 @@ public final class MyStrategy implements Strategy {
 
         } else if (self.getType() == TrooperType.SNIPER && self.getActionPoints() < self.getShootCost()) {
 
-            if (self.getActionPoints() >= game.getStanceChangeCost() && self.getDistanceTo(target) <= self.getShootingRange() + 1 && self.getStance() == TrooperStance.STANDING && world.isVisible(self.getShootingRange() + 1, self.getX(), self.getY(), TrooperStance.KNEELING, target.getX(), target.getY(), target.getStance()) || self.getDistanceTo(target) <= self.getShootingRange() + 1 && self.getStance() == TrooperStance.KNEELING && world.isVisible(self.getShootingRange() + 1, self.getX(), self.getY(), TrooperStance.PRONE, target.getX(), target.getY(), target.getStance())) {
+            if (self.getActionPoints() >= game.getStanceChangeCost() && self.getDistanceTo(target) <= self.getShootingRange() + 1 && self.getStance() == TrooperStance.STANDING && world.isVisible(self.getShootingRange() + 1, self.getX(), self.getY(), TrooperStance.KNEELING, target.getX(), target.getY(), target.getStance()) || self.getActionPoints() >= game.getStanceChangeCost() && self.getDistanceTo(target) <= self.getShootingRange() + 1 && self.getStance() == TrooperStance.KNEELING && world.isVisible(self.getShootingRange() + 1, self.getX(), self.getY(), TrooperStance.PRONE, target.getX(), target.getY(), target.getStance())) {
                 move.setAction(ActionType.LOWER_STANCE);
                 return true;
             } else if (self.getDistanceTo(target) <= self.getShootingRange() + 2 && self.getStance() == TrooperStance.STANDING && self.getActionPoints() >= 4) {
